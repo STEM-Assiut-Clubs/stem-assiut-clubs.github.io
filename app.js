@@ -86,7 +86,22 @@ Object.assign(T.ar, {
   approvedOk: "تمت الموافقة ✓", rejectedOk: "تم الرفض", by: "من", noRequests: "مفيش طلبات.",
 });
 
-const VERSION = "2026.10.12-fast-quiz";
+Object.assign(T.en, {
+  resetPw: "Reset password", confirmReset: "Reset the password of this account? The old password will stop working.",
+  tempPwTitle: "Temporary password for", tempPwNote: "Give it to the student. It is shown only once, and they must choose a new one when they sign in.",
+  copy: "Copy", copied: "Copied ✓", close: "Close", changePw: "Change password", oldPw: "Current password", newPw: "New password (6 or more characters)", pwChanged: "Password changed ✓",
+  mustChangeNote: "Your password was reset. Choose a new password to continue.", forgotHint: "Forgot your password? Ask the main admin to reset it for you. Your account and results stay as they are.",
+  err_bad_old: "The current password is wrong.",
+});
+Object.assign(T.ar, {
+  resetPw: "إعادة ضبط الباسورد", confirmReset: "تعيد ضبط باسورد الحساب ده؟ الباسورد القديم هيبطل يشتغل.",
+  tempPwTitle: "باسورد مؤقت لـ", tempPwNote: "اديه للطالب. بيظهر مرة واحدة بس، وهيطلب منه يختار باسورد جديد أول ما يدخل.",
+  copy: "نسخ", copied: "تم النسخ ✓", close: "إغلاق", changePw: "غيّر الباسورد", oldPw: "الباسورد الحالي", newPw: "الباسورد الجديد (6 حروف أو أكتر)", pwChanged: "تم تغيير الباسورد ✓",
+  mustChangeNote: "الباسورد بتاعك اتعاد ضبطه. اختار باسورد جديد عشان تكمل.", forgotHint: "نسيت الباسورد؟ اطلب من المشرف العام يعيد ضبطه ليك. حسابك ونتايجك زي ما هي.",
+  err_bad_old: "الباسورد الحالي غلط.",
+});
+
+const VERSION = "2026.10.13-password-reset";
 const CLUB_LIST = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
 const S = {
@@ -109,10 +124,11 @@ const visibleIds = () => {
   return mine.length ? mine : all;
 };
 const visClubs = () => CLUB_LIST.filter((c) => visibleIds().includes(c.id));
-const gate = () => (CFG.API_URL && !S.user ? "login" : "");
+const gate = () => (!CFG.API_URL ? "" : !S.user ? "login" : S.user.temp ? "password" : "");
 const seesItem = (x) => !CFG.API_URL || S.user?.role?.super || x.clubs.includes("*") || x.clubs.some((c) => visibleIds().includes(c));
-const newAdm = () => ({ sec: "content", form: null, req: false, uploading: "", reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
+const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
 S.adm = newAdm();
+S.pw = { old: "", new: "", err: "", busy: false };
 const t = (k) => T[S.lang][k];
 // small message pinned to the top of the screen; lives outside #app so re-renders don't remove it
 function toast(msg, ms) {
@@ -237,7 +253,7 @@ async function loadAll() {
   S.quizzes = (A.quizzes || []).map(mapQuiz).filter((x) => x.clubs.length);
   S.resources = S.resources.concat(S.quizzes);
   S.resources = S.resources.filter(seesItem); S.events = S.events.filter(seesItem);
-  render();
+  render(true);
 }
 
 // ---- helpers ----
@@ -255,7 +271,7 @@ async function api(action, data) {
   return r.json();
 }
 function setUser(u) { S.user = u; store.set("acct", u ? JSON.stringify(u) : ""); }
-function signOut() { setUser(null); S.results = { state: "idle", list: [] }; S.support = { state: "idle", list: [] }; S.draft = ""; S.acct = { mode: "login", err: "" }; S.form = {}; S.adm = newAdm(); S.qz = null; S.tab = "account"; render(); loadAll(); }
+function signOut() { setUser(null); S.results = { state: "idle", list: [] }; S.support = { state: "idle", list: [] }; S.draft = ""; S.acct = { mode: "login", err: "" }; S.form = {}; S.adm = newAdm(); S.qz = null; S.pw = { old: "", new: "", err: "", busy: false }; S.tab = "account"; render(); loadAll(); }
 async function loadResults() {
   if (!CFG.API_URL || !S.user) return;
   S.results = { state: "loading", list: S.results.list }; render(true);
@@ -275,7 +291,7 @@ async function submitAccount(form) {
   btn.disabled = true; btn.textContent = t("pleaseWait");
   try {
     const r = await api(reg ? "register" : "login", { username: v.username, name: v.name, password: v.password });
-    if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "home"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
+    if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null, temp: !!r.mustChange }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "home"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
     S.acct.err = T[S.lang]["err_" + r.error] || t("err_generic");
   } catch { S.acct.err = t("err_generic"); }
   render();
@@ -345,8 +361,35 @@ function supportScreen() {
     <button class="btn" type="submit"${S.sending ? " disabled" : ""}>${S.sending ? t("sending") : t("send")}</button></form>
   <h2>${t("myQuestions")}</h2>${list}`;
 }
+function pwForm(forced) {
+  const P = S.pw;
+  return `<h2>${t("changePw")}</h2><form id="pw-form" class="form">
+    ${forced ? "" : `<label for="pw-old">${t("oldPw")}</label><input id="pw-old" data-pw="old" type="password" autocomplete="current-password" required value="${esc(P.old)}">`}
+    <label for="pw-new">${t("newPw")}</label><input id="pw-new" data-pw="new" type="password" autocomplete="new-password" minlength="6" maxlength="64" required value="${esc(P.new)}">
+    ${P.err ? `<div class="warn" role="alert">${esc(P.err)}</div>` : ""}
+    <button class="btn" type="submit"${P.busy ? " disabled" : ""}>${P.busy ? t("saving") : t("changePw")}</button></form>`;
+}
+async function changePassword() {
+  const P = S.pw;
+  if (P.busy) return;
+  const forced = !!S.user.temp;
+  P.err = ""; P.busy = true; render(true);
+  try {
+    const r = await api("changePassword", { token: S.user.token, oldPassword: P.old, newPassword: P.new });
+    if (r.ok) {
+      S.pw = { old: "", new: "", err: "", busy: false };
+      setUser({ ...S.user, temp: false }); toast(t("pwChanged"), 2500);
+      if (forced) { S.tab = isAdmin() ? "admin" : "home"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); } else render(true);
+      return;
+    }
+    if (r.error === "auth") { signOut(); return; }
+    P.err = T[S.lang]["err_" + r.error] || t("err_generic");
+  } catch { P.err = t("err_generic"); }
+  P.busy = false; render(true);
+}
 function accountScreen() {
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div><p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">v${VERSION}</p>`;
+  if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">v${VERSION}</p>`;
   const reg = S.acct.mode === "register";
   return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
@@ -355,7 +398,7 @@ function accountScreen() {
     <label for="f-pass">${t("password")}</label><input id="f-pass" name="password" type="password" autocomplete="${reg ? "new-password" : "current-password"}" minlength="6" required>
     ${S.acct.err ? `<div class="warn" role="alert">${esc(S.acct.err)}</div>` : ""}
     <button class="btn" type="submit">${reg ? t("createAccount") : t("signIn")}</button>
-  </form><p class="note">${t("accountNote")}</p><p class="note" dir="ltr" style="opacity:.6">v${VERSION}</p>`;
+  </form>${reg ? "" : `<p class="note">${t("forgotHint")}</p>`}<p class="note">${t("accountNote")}</p><p class="note" dir="ltr" style="opacity:.6">v${VERSION}</p>`;
 }
 
 // Opens Google Drive / Docs / YouTube links inside the app instead of leaving it
@@ -539,7 +582,7 @@ async function refreshMe() {
     const r = await api("me", { token: S.user.token });
     if (r.ok) {
       const before = JSON.stringify(S.user.role);
-      setUser({ ...S.user, name: r.name, role: r.role || null });
+      setUser({ ...S.user, name: r.name, role: r.role || null, temp: !!r.mustChange });
       if (before !== JSON.stringify(S.user.role)) await loadAll(); else render(true);
     } else if (r.error === "auth") signOut();
   } catch {}
@@ -693,6 +736,15 @@ async function loadUsers() {
   } catch { A.users = { state: "error", list: A.users.list }; }
   render(true);
 }
+async function admResetPw(username) {
+  if (!confirm(t("confirmReset") + "\n@" + username)) return;
+  try {
+    const r = await api("adminResetPassword", { token: S.user.token, username });
+    if (r.ok) { S.adm.pwShown = { username: r.username, password: r.password }; render(true); document.querySelector("main")?.scrollTo?.(0, 0); return; }
+    if (r.error === "auth") { signOut(); return; }
+    toast(admErr(r), 3000);
+  } catch { toast(t("err_generic"), 3000); }
+}
 async function admSaveRole() {
   const A = S.adm, e = A.roleEdit;
   if (!e) return;
@@ -830,9 +882,10 @@ function admTeam() {
     const r = parseRoleStr(u.role), isMe = u.username === S.user.username;
     return `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(u.name)}</b><span dir="ltr">@${esc(u.username)}</span></div>
       <span class="badge">${esc(r.super || r.clubs.length ? roleLabel(r) : t("student"))}</span>
-      ${isMe ? "" : `<button class="mini" data-adm="role-edit" data-u="${esc(u.username)}">${t("changeRole")}</button>`}</div>`;
+      ${isMe ? "" : `<button class="mini" data-adm="role-edit" data-u="${esc(u.username)}">${t("changeRole")}</button><button class="mini" data-adm="pw-reset" data-u="${esc(u.username)}">${t("resetPw")}</button>`}</div>`;
   };
-  return `<input id="q" type="search" placeholder="${esc(t("searchUsers"))}" value="${esc(S.q)}" dir="auto">${list.map(tile).join("") || `<p class="note">${t("empty")}</p>`}`;
+  const shown = A.pwShown ? `<div class="hero"><small>${t("tempPwTitle")} @${esc(A.pwShown.username)}</small><b dir="ltr" style="font-size:28px;letter-spacing:.14em;user-select:all">${esc(A.pwShown.password)}</b><span>${t("tempPwNote")}</span></div><div class="row-actions"><button class="mini primary" data-adm="pw-copy">${t("copy")}</button><button class="mini" data-adm="pw-close">${t("close")}</button></div>` : "";
+  return `${shown}<input id="q" type="search" placeholder="${esc(t("searchUsers"))}" value="${esc(S.q)}" dir="auto">${list.map(tile).join("") || `<p class="note">${t("empty")}</p>`}`;
 }
 function adminScreen() {
   if (!isAdmin()) return `<p class="note">${t("noAccess")}</p>`;
@@ -936,11 +989,15 @@ document.addEventListener("click", (e) => {
   else if (d.adm === "opt-del") { const q = A.form.questions[qi]; q.options.splice(oj, 1); if (q.correct === oj) q.correct = 0; else if (q.correct > oj) q.correct -= 1; render(true); }
   else if (d.adm === "role-edit") { const u = A.users.list.find((x) => x.username === d.u); if (u) { const r = parseRoleStr(u.role); A.roleEdit = { username: u.username, super: r.super, clubs: r.clubs.filter((c) => clubInfo(c)) }; render(true); } }
   else if (d.adm === "role-save") admSaveRole();
+  else if (d.adm === "pw-reset") admResetPw(d.u);
+  else if (d.adm === "pw-copy") { navigator.clipboard?.writeText(A.pwShown?.password || "").then(() => toast(t("copied"), 1500)).catch(() => {}); }
+  else if (d.adm === "pw-close") { A.pwShown = null; render(true); }
   else if (d.adm === "role-cancel") { A.roleEdit = null; render(true); }
 });
 document.addEventListener("input", (e) => {
   const el = e.target, A = S.adm, d = el.dataset || {};
-  if (d.af && A.form) A.form[d.af] = el.value;
+  if (d.pw) S.pw[d.pw] = el.value;
+  else if (d.af && A.form) A.form[d.af] = el.value;
   else if (d.ar) A.drafts[d.ar] = el.value;
   else if (d.aq && A.form?.questions) {
     const q = A.form.questions[+d.qi];
@@ -967,7 +1024,8 @@ document.addEventListener("change", (e) => {
     const h = document.getElementById("qz-hint"); if (h) h.hidden = ready;
   }
 });
-document.addEventListener("submit", (e) => { if (e.target.id === "adm-form") { e.preventDefault(); if (S.adm.kind === "quiz") admSaveQuiz(); else admSave(); } });
+document.addEventListener("submit", (e) => { if (e.target.id === "pw-form") { e.preventDefault(); changePassword(); return; }
+  if (e.target.id === "adm-form") { e.preventDefault(); if (S.adm.kind === "quiz") admSaveQuiz(); else admSave(); } });
 
 function navHtml() {
   if (gate()) return "";
@@ -978,6 +1036,8 @@ function navHtml() {
 
 // ---- shell ----
 function render(keep) {
+  // a background refresh must never drop the keyboard or wipe what someone is typing
+  if (keep && document.activeElement?.closest?.("[data-pw],[data-ar],[data-af],[data-aq],#f-user,#f-name,#f-pass,#f-msg")) return;
   const vis = visClubs();
   if (vis.length && !vis.some((c) => c.id === S.club)) { S.club = vis[0].id; store.set("club", S.club); }
   if (gate()) S.tab = "account";
