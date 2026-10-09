@@ -86,7 +86,7 @@ Object.assign(T.ar, {
   approvedOk: "تمت الموافقة ✓", rejectedOk: "تم الرفض", by: "من", noRequests: "مفيش طلبات.",
 });
 
-const VERSION = "2026.10.11-rename";
+const VERSION = "2026.10.12-fast-quiz";
 const CLUB_LIST = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
 const S = {
@@ -290,7 +290,7 @@ function resultTile(x) {
 function resultsBlock() {
   if (!CFG.API_URL) return "";
   if (!S.user) return `<button class="card" data-go="account"><div class="ico">${icon("user")}</div><div class="grow"><b>${t("signInToSee")}</b></div></button>`;
-  const R = S.results;
+  const R = { ...S.results, list: S.results.list.filter((x) => !x.club || inClub({ clubs: parseClubs(x.club) }, S.club)) };
   const body = R.state === "loading" || R.state === "idle" ? `<p class="note">${t("loadingRes")}</p>`
     : R.state === "error" ? `<div class="warn">${t("resultsErr")}</div>`
     : !R.list.length ? `<p class="note">${t("noResults")}</p>` : R.list.map(resultTile).join("");
@@ -587,7 +587,7 @@ async function admSave() {
     if (r.ok) {
       const wasReq = A.req;
       A.form = null; A.busy = false; A.req = false; toast(t(wasReq ? "reqSent" : "saved"), 2000);
-      if (wasReq) { await loadAdminInbox(); render(); } else await loadAll();
+      render(); if (wasReq) loadAdminInbox(); else loadAll();
       return;
     }
     if (r.error === "auth") { signOut(); return; }
@@ -607,7 +607,7 @@ async function admSaveQuiz() {
   A.busy = true; render(true);
   try {
     const r = await api("adminQuizSave", { token: S.user.token, id: A.editId || undefined, item: { club: f.clubs.join("+"), title: f.title, lo: f.lo, attempts: +f.attempts || 0, questions: f.questions } });
-    if (r.ok) { A.form = null; A.busy = false; toast(t("saved"), 2000); await loadAll(); return; }
+    if (r.ok) { A.form = null; A.busy = false; toast(t("saved"), 2000); render(); loadAll(); return; }
     if (r.error === "auth") { signOut(); return; }
     if (r.error === "forbidden") refreshMe();
     A.err = admErr(r);
@@ -618,7 +618,7 @@ async function admDelete(kind, id) {
   if (!confirm(t("confirmDel"))) return;
   try {
     const r = await api("adminDelete", { token: S.user.token, kind, id });
-    if (r.ok) { toast(t("deleted"), 2000); await loadAll(); return; }
+    if (r.ok) { toast(t("deleted"), 2000); loadAll(); return; }
     if (r.error === "auth") { signOut(); return; }
     toast(admErr(r), 3000);
   } catch { toast(t("err_generic"), 3000); }
@@ -909,7 +909,7 @@ function quizScreen() {
   return `<div class="hero"><small>${t("quizzes")}</small><b dir="auto">${esc(Q.title)}</b><span>${nf.format(Q.questions.length)} ${t("questionsWord")}${left ? " · " + esc(left) : ""}</span></div>
     ${items}
     <p class="note" id="qz-hint"${ready ? " hidden" : ""}>${t("qzAnswerAll")}</p>
-    <button class="btn" id="qz-submit" data-qzs${ready && Q.state === "ready" ? "" : " disabled"}>${t("qzSubmit")}</button>${back}`;
+    <button class="btn" id="qz-submit" data-qzs${ready && Q.state === "ready" ? "" : " disabled"}>${Q.state === "submitting" ? t("saving") : t("qzSubmit")}</button>${back}`;
 }
 
 // ---- events for admin and quiz screens ----
