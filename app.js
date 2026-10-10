@@ -101,7 +101,16 @@ Object.assign(T.ar, {
   err_bad_old: "الباسورد الحالي غلط.",
 });
 
-const VERSION = "2026.10.13-password-reset";
+Object.assign(T.en, {
+  preview: "Student view", previewBanner: "Student view: this is exactly what students see. Nothing you do here is saved.",
+  previewQuizNote: "Preview only: submitting is turned off, so no result is recorded.",
+});
+Object.assign(T.ar, {
+  preview: "شكل الطالب", previewBanner: "شكل الطالب: ده بالظبط اللي الطالب بيشوفه. أي حاجة تعملها هنا مش بتتسجل.",
+  previewQuizNote: "معاينة بس: التسليم متوقف، فمفيش نتيجة بتتسجل.",
+});
+
+const VERSION = "2026.10.14-student-view";
 const CLUB_LIST = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
 const S = {
@@ -129,6 +138,7 @@ const seesItem = (x) => !CFG.API_URL || S.user?.role?.super || x.clubs.includes(
 const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
 S.adm = newAdm();
 S.pw = { old: "", new: "", err: "", busy: false };
+S.preview = false;
 const t = (k) => T[S.lang][k];
 // small message pinned to the top of the screen; lives outside #app so re-renders don't remove it
 function toast(msg, ms) {
@@ -157,6 +167,7 @@ const P = {
   quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 015 .5c0 1.5-2.5 2-2.5 3.5M12 17v.5"/>',
   support: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10h6M9 13.5h4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
   reference: '<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>',
 };
@@ -271,7 +282,7 @@ async function api(action, data) {
   return r.json();
 }
 function setUser(u) { S.user = u; store.set("acct", u ? JSON.stringify(u) : ""); }
-function signOut() { setUser(null); S.results = { state: "idle", list: [] }; S.support = { state: "idle", list: [] }; S.draft = ""; S.acct = { mode: "login", err: "" }; S.form = {}; S.adm = newAdm(); S.qz = null; S.pw = { old: "", new: "", err: "", busy: false }; S.tab = "account"; render(); loadAll(); }
+function signOut() { setUser(null); S.results = { state: "idle", list: [] }; S.support = { state: "idle", list: [] }; S.draft = ""; S.acct = { mode: "login", err: "" }; S.form = {}; S.adm = newAdm(); S.qz = null; S.pw = { old: "", new: "", err: "", busy: false }; S.preview = false; S.tab = "account"; render(); loadAll(); }
 async function loadResults() {
   if (!CFG.API_URL || !S.user) return;
   S.results = { state: "loading", list: S.results.list }; render(true);
@@ -919,7 +930,7 @@ async function openQuiz(id) {
 }
 async function submitQuiz() {
   const Q = S.qz;
-  if (!Q || Q.state !== "ready" || Q.answers.some((a) => a < 0)) return;
+  if (!Q || Q.state !== "ready" || isAdmin() || Q.answers.some((a) => a < 0)) return;
   Q.state = "submitting"; render(true);
   try {
     const r = await api("quizSubmit", { token: S.user.token, id: Q.id, answers: Q.answers });
@@ -961,8 +972,9 @@ function quizScreen() {
   const ready = Q.answers.every((a) => a >= 0);
   return `<div class="hero"><small>${t("quizzes")}</small><b dir="auto">${esc(Q.title)}</b><span>${nf.format(Q.questions.length)} ${t("questionsWord")}${left ? " · " + esc(left) : ""}</span></div>
     ${items}
+    ${isAdmin() ? `<div class="warn" role="note">${t("previewQuizNote")}</div>` : ""}
     <p class="note" id="qz-hint"${ready ? " hidden" : ""}>${t("qzAnswerAll")}</p>
-    <button class="btn" id="qz-submit" data-qzs${ready && Q.state === "ready" ? "" : " disabled"}>${Q.state === "submitting" ? t("saving") : t("qzSubmit")}</button>${back}`;
+    <button class="btn" id="qz-submit" data-qzs${ready && Q.state === "ready" && !isAdmin() ? "" : " disabled"}>${Q.state === "submitting" ? t("saving") : t("qzSubmit")}</button>${back}`;
 }
 
 // ---- events for admin and quiz screens ----
@@ -1020,18 +1032,26 @@ document.addEventListener("change", (e) => {
   } else if (d.qza !== undefined && S.qz) {
     S.qz.answers[+d.qza] = +el.value;
     const ready = S.qz.answers.every((a) => a >= 0);
-    const b = document.getElementById("qz-submit"); if (b) b.disabled = !ready;
+    const b = document.getElementById("qz-submit"); if (b) b.disabled = !ready || isAdmin();
     const h = document.getElementById("qz-hint"); if (h) h.hidden = ready;
   }
 });
 document.addEventListener("submit", (e) => { if (e.target.id === "pw-form") { e.preventDefault(); changePassword(); return; }
   if (e.target.id === "adm-form") { e.preventDefault(); if (S.adm.kind === "quiz") admSaveQuiz(); else admSave(); } });
 
+// What an admin sees at the top of the student screens when previewing: a reminder and the three student sections.
+function previewBar() {
+  if (!(isAdmin() && S.preview) || ["admin", "account"].includes(S.tab)) return "";
+  const cur = CHILD.includes(S.tab) ? "home" : S.tab;
+  return `<div class="warn" role="note">${t("previewBanner")}</div><div class="seg" role="group">${["home", "library", "events"].map((k) => `<button data-go="${k}" class="${cur === k ? "on" : ""}">${t(k)}</button>`).join("")}</div>`;
+}
 function navHtml() {
   if (gate()) return "";
-  const items = isAdmin() ? [["admin", "settings"], ["account", "user"]] : [["home", "home"], ["library", "book"], ["events", "cal"], ...(CFG.API_URL ? [["support", "support"], ["account", "user"]] : [])];
+  const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
+  const on = (k) => (isAdmin() ? (k === "preview" ? inPreview : S.tab === k) : S.tab === k || (k === "home" && CHILD.includes(S.tab)));
+  const items = isAdmin() ? [["admin", "settings"], ["preview", "eye"], ["account", "user"]] : [["home", "home"], ["library", "book"], ["events", "cal"], ...(CFG.API_URL ? [["support", "support"], ["account", "user"]] : [])];
   const dot = (on) => (on ? `<i aria-label="new" style="position:absolute;top:10px;inset-inline-start:calc(50% + 6px);width:10px;height:10px;border-radius:50%;background:#E5484D;border:2px solid #fff"></i>` : "");
-  return `<nav>${items.map(([k, ic]) => `<button data-go="${k}" class="${S.tab === k || (k === "home" && CHILD.includes(S.tab)) ? "on" : ""}"${S.tab === k ? ' aria-current="page"' : ""}${k === "support" || k === "admin" ? ' style="position:relative"' : ""}>${icon(ic)}<span>${t(k)}</span>${dot(k === "support" && S.user && answeredCount() > Number(store.get("supSeen", "0")) && S.tab !== "support")}${dot(k === "admin" && unansweredAdm() > 0 && S.tab !== "admin")}</button>`).join("")}</nav>`;
+  return `<nav>${items.map(([k, ic]) => `<button data-go="${k}" class="${on(k) ? "on" : ""}"${on(k) ? ' aria-current="page"' : ""}${k === "support" || k === "admin" ? ' style="position:relative"' : ""}>${icon(ic)}<span>${t(k)}</span>${dot(k === "support" && S.user && answeredCount() > Number(store.get("supSeen", "0")) && S.tab !== "support")}${dot(k === "admin" && unansweredAdm() > 0 && S.tab !== "admin")}</button>`).join("")}</nav>`;
 }
 
 // ---- shell ----
@@ -1041,7 +1061,11 @@ function render(keep) {
   const vis = visClubs();
   if (vis.length && !vis.some((c) => c.id === S.club)) { S.club = vis[0].id; store.set("club", S.club); }
   if (gate()) S.tab = "account";
-  else if (isAdmin() && !["admin", "account"].includes(S.tab)) S.tab = "admin";
+  else if (isAdmin()) {
+    if (S.tab === "preview") { S.preview = true; S.tab = "home"; }
+    else if (S.tab === "admin") S.preview = false;
+    if (!S.preview && !["admin", "account"].includes(S.tab)) S.tab = "admin";
+  }
   const prev = keep ? document.querySelector("main")?.scrollTop : 0;
   const root = document.documentElement;
   const ci = clubInfo(S.club);
@@ -1065,7 +1089,7 @@ function render(keep) {
   app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
     <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="icon-btn" data-act="lang">${t("lang")}</button></div>
     ${showSwitch && vis.length > 1 ? `<div class="switch" role="group">${vis.map((c) => `<button data-club="${c.id}" class="${S.club === c.id ? "on" : ""}" aria-pressed="${S.club === c.id}"${S.club === c.id ? ` style="background:${c.color}"` : ""}>${t(c.id)}</button>`).join("")}</div>` : ""}</header>
-  <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${screens[S.tab]()}</main>
+  <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${screens[S.tab]()}</main>
   ${navHtml()}`;
   if (prev) document.querySelector("main").scrollTop = prev;
   document.querySelector(".switch button.on")?.scrollIntoView({ inline: "center", block: "nearest" });
