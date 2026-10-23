@@ -7,13 +7,13 @@ const store = {
 
 const T = {
   en: { app: "STEM Assiut Clubs", tagline: "Your school clubs in one place", home: "Home", library: "Library", events: "Events", joint: "Joint",
-    chemistry: "Chemistry", physics: "Physics", deutsch: "Deutsch", mechanics: "Mechanics", capstone: "Capstone", math: "Math", next: "Next meeting", noNext: "No upcoming meetings yet", files: "Files", videos: "Videos", refs: "References",
+    chemistry: "Chemistry", physics: "Physics", deutsch: "Deutsch", mechanics: "Mechanics", capstone: "Capstone", math: "Math", biology: "Biology", extSite: "opens a website", next: "Next meeting", noNext: "No upcoming meetings yet", files: "Files", videos: "Videos", refs: "References",
     filesSub: "Notes, slides, worksheets", videosSub: "Lessons and lab demos", refsSub: "Links and further reading", jointSpace: "Joint space", jointSub: "Shared with other clubs",
     recent: "Recently added", all: "All", search: "Search the library", empty: "Nothing here yet.", upcoming: "Upcoming", jointTitle: "Where our clubs meet",
     jointBlurb: "Topics, events and materials your club shares with other clubs.", shared: "SHARED WITH OTHER CLUBS", sharedMaterials: "Shared materials", jointEvents: "Joint events",
     refreshing: "Refreshing…", updated: "Updated ✓", support: "Support", supportSub: "Ask us anything, we reply here", askTitle: "Ask the team", askPh: "Write your question…", send: "Send", sending: "Sending…", sentOk: "Sent. We will reply here.", myQuestions: "Your questions", teamReply: "Team reply", waiting: "Waiting for a reply", noQuestions: "No questions yet.", signInToAsk: "Sign in to contact the team", supportErr: "Could not load your questions.", err_empty: "Write your question first.", err_too_long: "Message is too long (max 500 characters).", err_too_fast: "You sent many messages. Try again in a little while.", offline: "You're offline. Showing the last saved content.", refresh: "Refresh", lang: "عربي", jointBadge: "Joint", account: "Profile", signIn: "Sign in", createAccount: "Create account", username: "Username", fullName: "Full name", password: "Password", signOut: "Sign out", myResults: "My results", noResults: "No results yet. Your score appears here a few minutes after you finish a quiz.", signInToSee: "Sign in to see your quiz results", signInFirst: "Sign in first to take this quiz", accountNote: "Only you can see your results. Use the same username when a quiz asks for it.", hello: "Signed in as", loadingRes: "Loading your results...", resultsErr: "Could not load results. Try again later.", err_invalid_username: "Username must be 3-20 letters, numbers, dot, dash or underscore.", err_invalid_password: "Password must be at least 6 characters.", err_invalid_name: "Please enter your name.", err_taken: "This username is already taken.", err_bad_credentials: "Wrong username or password.", err_locked: "Too many attempts. Try again in 10 minutes.", err_generic: "Something went wrong. Check your connection and try again.", pleaseWait: "Please wait...", accountSub: "Your private quiz results", quizTakeHint: "Sign in first", general: "General", items: "items", los: "LOs", losSub: "Files, videos and more, by LO", refsTitle: "References", refsPageSub: "Links and further reading", back: "Back", download: "Download", downloading: "Downloading…", dlNote: "Download started. Big files can take a few minutes depending on your internet. Follow the progress in your phone's notifications and find the file in Downloads.", openExt: "Open in browser", revision: "Revision", revisionTitle: "Revision & Exams", revisionMaterial: "Revision files", exams: "Exams", revisionSub: "Summaries, revision files and exams", revisionAll: "Revision files and exams from your club and joint ones", quizzes: "Quizzes", quizzesSub: "Test yourself", quizTitle: "Quizzes", quizAll: "Quizzes from your club and joint quizzes" },
   ar: { app: "STEM Assiut Clubs", tagline: "نوادي مدرستك في مكان واحد", home: "الرئيسية", library: "المكتبة", events: "المواعيد", joint: "مشترك",
-    chemistry: "الكيمياء", physics: "الفيزياء", deutsch: "الألماني", mechanics: "الميكانيكا", capstone: "الكابستون", math: "الرياضيات", next: "الاجتماع القادم", noNext: "مفيش اجتماعات قادمة لسه", files: "ملفات", videos: "فيديوهات", refs: "مراجع",
+    chemistry: "الكيمياء", physics: "الفيزياء", deutsch: "الألماني", mechanics: "الميكانيكا", capstone: "الكابستون", math: "الرياضيات", biology: "الأحياء", extSite: "بيفتح موقع", next: "الاجتماع القادم", noNext: "مفيش اجتماعات قادمة لسه", files: "ملفات", videos: "فيديوهات", refs: "مراجع",
     filesSub: "ملخصات وسلايدات وشيتات", videosSub: "شرح وتجارب معملية", refsSub: "لينكات وقراءة إضافية", jointSpace: "المساحة المشتركة", jointSub: "مشترك مع نوادي تانية",
     recent: "أُضيف حديثًا", all: "الكل", search: "ابحث في المكتبة", empty: "مفيش حاجة هنا لسه.", upcoming: "القادم", jointTitle: "حيث تلتقي نوادينا",
     jointBlurb: "موضوعات ومواعيد ومواد ناديك بيشاركها مع نوادي تانية.", shared: "مشترك مع نوادي تانية", sharedMaterials: "مواد مشتركة", jointEvents: "فعاليات مشتركة",
@@ -110,8 +110,10 @@ Object.assign(T.ar, {
   previewQuizNote: "معاينة بس: التسليم متوقف، فمفيش نتيجة بتتسجل.",
 });
 
-const VERSION = "2026.10.14-student-view";
-const CLUB_LIST = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
+const VERSION = "2026.10.15-biology-link";
+const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
+const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
+const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
 const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
 const S = {
   club: clubInfo(store.get("club", "")) ? store.get("club", "") : CLUB_LIST[0].id,
@@ -1088,7 +1090,7 @@ function render(keep) {
   const keepFocusQ = document.activeElement?.id === "q";
   app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
     <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="icon-btn" data-act="lang">${t("lang")}</button></div>
-    ${showSwitch && vis.length > 1 ? `<div class="switch" role="group">${vis.map((c) => `<button data-club="${c.id}" class="${S.club === c.id ? "on" : ""}" aria-pressed="${S.club === c.id}"${S.club === c.id ? ` style="background:${c.color}"` : ""}>${t(c.id)}</button>`).join("")}</div>` : ""}</header>
+    ${showSwitch && vis.length + LINK_CLUBS.length > 1 ? `<div class="switch" role="group">${vis.map((c) => `<button data-club="${c.id}" class="${S.club === c.id ? "on" : ""}" aria-pressed="${S.club === c.id}"${S.club === c.id ? ` style="background:${c.color}"` : ""}>${t(c.id)}</button>`).join("")}${LINK_CLUBS.map((c) => `<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(t(c.id) + " (" + t("extSite") + ")")}">${t(c.id)} <span aria-hidden="true">↗</span></a>`).join("")}</div>` : ""}</header>
   <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${screens[S.tab]()}</main>
   ${navHtml()}`;
   if (prev) document.querySelector("main").scrollTop = prev;

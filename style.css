@@ -99,3 +99,6 @@ button.card{font:inherit;cursor:pointer}
 .badge.ok{background:#E3F5E9;color:#14532D}
 .badge.no{background:#FDE8E8;color:#7A1C1C}
 input[type=file]{font:inherit;padding:10px 0}
+
+.switch a.ext{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px;white-space:nowrap;height:44px;border-radius:999px;color:#4A4760;font-weight:600;font-size:14px;text-decoration:none;border:1px dashed #C9C5DA}
+.switch a.ext:focus-visible{outline:3px solid var(--accent);outline-offset:2px}

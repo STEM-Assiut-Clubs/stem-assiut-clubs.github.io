@@ -8,6 +8,9 @@ window.APP_CONFIG = {
   REVISION_CSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTig4BxAJkrB7B20LesAZwjDirZR0fba4oj73rZRNgqY96x6sadZiIeNQNTQSSBcw/pub?gid=1649821499&single=true&output=csv",
   // خدمة الحسابات ونتائج الكويزات (Apps Script)
   API_URL: "https://script.google.com/macros/s/AKfycbyE7XaAzTWPdpU6Q1BXOmLr4h5WGAQgphRTSwB0g0qZzKAC6Sr5gZ18GQ--8i061YKjtw/exec",
+  // true = لسه بيقرا الشيتات القديمة جنب المحتوى اللي من التطبيق (من غير تكرار). بعد ما تشغّل importLegacy خليها false.
+  // true = also read the old published sheets next to the in-app content. Set false after running importLegacy.
+  LEGACY_CSV: true,
   LOGOS: { chemistry: "icons/chemistry_logo.png", physics: "icons/physics_logo.png" },
   // قائمة النوادي / Clubs list. لإضافة نادي جديد: أضف سطر هنا + اسمه في T جوه app.js + اكتب id في عمود club في الشيت.
   // To add a club: add a line here, its name in T (app.js), and use the id in the sheet's "club" column.
@@ -20,5 +23,10 @@ window.APP_CONFIG = {
     { id: "mechanics", color: "#0F766E", tint: "#E3F5F3", logo: "icons/mechanics_logo.png" },
     { id: "capstone",  color: "#BE185D", tint: "#FCE9F1", logo: "icons/capstone_logo.png" },
     { id: "math",      color: "#15803D", tint: "#E6F5EB", logo: "icons/math_logo.png" },
+    // الأحياء ليه موقع خاص بيه: لما الطالب يدوس عليه بيفتح الموقع ده بدل صفحة جوه التطبيق.
+    // حط لينك الموقع في url (لازم يبدأ بـ https://). لحد ما تحطه الزرار بيفضل مخفي.
+    // Biology has its own website: tapping it opens that site instead of a page inside the app.
+    // Put the website address in url (must start with https://). The button stays hidden until you do.
+    { id: "biology",   external: true, url: "" },
   ],
 };
