@@ -110,13 +110,30 @@ Object.assign(T.ar, {
   previewQuizNote: "معاينة بس: التسليم متوقف، فمفيش نتيجة بتتسجل.",
 });
 
-const VERSION = "2026.10.15-biology-link";
+Object.assign(T.en, {
+  gradeWord: "Grade", gradeAll: "All grades", fGrades: "Grade(s)", fAllGrades: "All grades",
+  qzCancelled: "Quiz cancelled", qzCancelledNote: "You left the quiz screen, so this attempt was cancelled and your score is 0.",
+  qzLeaveConfirm: "Leave the quiz? This attempt will be cancelled and your score will be 0.",
+  qzWarnNote: "Stay on this screen. If you switch apps, lock your phone or close the app, the quiz is cancelled and your score is 0.",
+  qzCancelledToast: "Your last quiz was cancelled because you left it. Score: 0.",
+});
+Object.assign(T.ar, {
+  gradeWord: "جريد", gradeAll: "كل الجرايد", fGrades: "الجريد", fAllGrades: "كل الجرايد",
+  qzCancelled: "الكويز اتلغى", qzCancelledNote: "خرجت من شاشة الكويز، فالمحاولة دي اتلغت ودرجتك صفر.",
+  qzLeaveConfirm: "تخرج من الكويز؟ المحاولة هتتلغي ودرجتك هتبقى صفر.",
+  qzWarnNote: "خليك في الشاشة دي. لو غيّرت التطبيق أو قفلت الموبايل أو قفلت التطبيق، الكويز بيتلغي ودرجتك صفر.",
+  qzCancelledToast: "آخر كويز اتلغى لأنك خرجت منه. الدرجة: صفر.",
+});
+
+const VERSION = "2026.11.03-grades-quiz-lock";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
 const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
+const GRADES = (CFG.GRADES || ["10", "11", "12"]).map(String);
 const S = {
   club: clubInfo(store.get("club", "")) ? store.get("club", "") : CLUB_LIST[0].id,
+  grade: GRADES.includes(store.get("grade", "")) ? store.get("grade", "") : "all",
   tab: "home", filter: "all", q: "", open: {},
   lang: store.get("lang", (navigator.language || "en").startsWith("ar") ? "ar" : "en"),
   resources: [], events: [], quizzes: [], qz: null, live: true,
@@ -218,6 +235,25 @@ const inClub = (x, c) => x.clubs.includes("*") || x.clubs.includes(c);      // r
 const isShared = (x) => x.clubs.length > 1 || x.clubs[0] === "*";             // belongs to 2+ clubs
 const ownOnly = (x, c) => !isShared(x) && x.clubs[0] === c;                   // belongs to this club only
 const clubsLabel = (x) => (x.clubs[0] === "*" ? t("jointBadge") : x.clubs.map((c) => t(c)).join(" + "));
+// عمود grade ممكن يبقى 10 أو 11+12 أو all أو فاضي (فاضي = كل الجرايد). ["*"] = كل الجرايد.
+// The grade column can be 10, 11+12, all, or empty (empty = every grade). ["*"] means every grade.
+function parseGrades(str) {
+  const out = new Set();
+  for (const raw of String(str ?? "").split(/[+,&\/|;؛\s]+/)) {
+    const p = raw.trim().toLowerCase().replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/^(grade|جريد|g)/, "");
+    if (!p) continue;
+    if (p === "all" || p === "everyone" || p === "الكل") return ["*"];
+    if (GRADES.includes(p)) out.add(p);
+  }
+  return out.size ? [...out] : ["*"];
+}
+const gradesToForm = (g) => (!g || g.includes("*") ? ["all"] : [...g]);
+const gradeStr = (f) => (!f.grades?.length || f.grades.includes("all") ? "all" : f.grades.join("+"));
+const gradeName = (g) => `${t("gradeWord")} ${new Intl.NumberFormat(locale()).format(+g)}`;
+const gradesLabel = (x) => (!x.grades || x.grades.includes("*") ? "" : x.grades.map(gradeName).join(" + "));
+// الطالب شايف اللي ليه: المحتوى من غير جريد بيظهر لكل الجرايد / content with no grade shows for every grade
+const inGrade = (x) => S.grade === "all" || !x.grades || x.grades.includes("*") || x.grades.includes(S.grade);
+const gres = () => S.resources.filter(inGrade);
 const TYPES = { file: "file", "ملف": "file", video: "video", "فيديو": "video", reference: "reference", link: "reference", revision: "revision", "مراجعة": "revision", exam: "exam", "امتحان": "exam", quiz: "quiz", "كويز": "quiz", "اختبار": "quiz", "مرجع": "reference", "لينك": "reference" };
 function parseDate(s) { const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
 
@@ -231,7 +267,7 @@ async function loadCsv(url, key) {
   } catch { return { text: store.get(key, ""), live: false }; }
 }
 const toRes = (rows, base, forceType) => rows.map((x, i) => ({ clubs: parseClubs(x.club), type: forceType ? forceType(x) : (TYPES[x.type?.toLowerCase()] || "reference"),
-  id: x.id || "", ds: x.date || "", title: x.title, desc: x.description, url: x.url, lo: (x.lo || "").trim(), date: parseDate(x.date), i: base + i })).filter((x) => x.clubs.length && x.title);
+  id: x.id || "", ds: x.date || "", title: x.title, desc: x.description, url: x.url, lo: (x.lo || "").trim(), date: parseDate(x.date), grades: parseGrades(x.grade), i: base + i })).filter((x) => x.clubs.length && x.title);
 const cacheKey = () => "api_content_" + (S.user?.username || "guest");
 async function loadApiContent() {
   if (!CFG.API_URL) return { live: true, data: null };
@@ -242,7 +278,7 @@ async function loadApiContent() {
     throw new Error("content");
   } catch { try { return { live: false, data: JSON.parse(store.get(cacheKey(), "")) }; } catch { return { live: false, data: null }; } }
 }
-const mapQuiz = (x, i) => ({ id: "", qid: x.id, native: true, clubs: parseClubs(x.club), type: "quiz", title: x.title, desc: "", lo: x.lo || "", url: "", date: parseDate(x.date), ds: x.date || "", attempts: +x.attempts || 0, count: x.count || 0, i: 40000 + i });
+const mapQuiz = (x, i) => ({ id: "", qid: x.id, native: true, clubs: parseClubs(x.club), type: "quiz", title: x.title, desc: "", lo: x.lo || "", url: "", date: parseDate(x.date), ds: x.date || "", grades: parseGrades(x.grade), attempts: +x.attempts || 0, count: x.count || 0, i: 40000 + i });
 const mapEv = (x) => ({ id: x.id || "", clubs: parseClubs(x.club), title: x.title, date: parseDate(x.date), ds: x.date || "", time: x.time, place: x.place, note: x.note });
 async function loadAll() {
   // Content comes from the app's own sheets (via the API). The old published CSV sheets still load too
@@ -530,7 +566,7 @@ function home() {
   const evs = upcoming(S.events.filter((e) => inClub(e, S.club)));
   const next = evs[0];
   const when = next ? new Intl.DateTimeFormat(locale(), { weekday: "long", day: "numeric", month: "long" }).format(next.date) + [next.time && " · " + next.time, next.place && " · " + next.place].filter(Boolean).join("") : "";
-  const recent = recentFirst(S.resources.filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type))).slice(0, 3);
+  const recent = recentFirst(gres().filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type))).slice(0, 3);
   const tile = (ic, b, s, tab, f, wide) => `<button class="tile${wide ? " wide" : ""}" data-go="${tab}" data-filter="${f || "all"}">${icon(ic, 26)}<b>${t(b)}</b><span>${t(s)}</span></button>`;
   return `<div class="hero"><small>${t("next")}</small><b dir="auto">${next ? esc(next.title) : t("noNext")}</b><span dir="auto">${esc(when)}</span></div>
   <div class="grid">${tile("book", "los", "losSub", "library")}${tile("reference", "refs", "refsSub", "references")}${tile("revision", "revision", "revisionSub", "revision")}${tile("quiz", "quizzes", "quizzesSub", "quizzes")}${tile("joint", "jointSpace", "jointSub", "joint", "all", true)}</div>
@@ -538,7 +574,7 @@ function home() {
 }
 function library() {
   const q = S.q.trim().toLowerCase();
-  const items = recentFirst(S.resources.filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type) && (!q || (r.title + " " + r.desc).toLowerCase().includes(q))));
+  const items = recentFirst(gres().filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type) && (!q || (r.title + " " + r.desc).toLowerCase().includes(q))));
   return `<input type="search" id="q" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(S.q)}">
   ${loSections(S.club, items, !!q) || empty()}`;
 }
@@ -547,16 +583,16 @@ function eventsScreen() {
   return `<h2>${t("upcoming")}</h2>${list.map(evTile).join("") || empty()}`;
 }
 function referencesScreen() {
-  const list = recentFirst(S.resources.filter((r) => r.type === "reference" && inClub(r, S.club)));
+  const list = recentFirst(gres().filter((r) => r.type === "reference" && inClub(r, S.club)));
   const body = list.some((r) => r.lo) ? loSections(S.club + "-ref", list, true) : list.map(resTile).join("");
   return `<div class="hero"><small>${t("refs")}</small><b>${t("refsTitle")}</b><span>${t("refsPageSub")}</span></div>${body || empty()}`;
 }
 function quizzesScreen() {
-  const list = recentFirst(S.resources.filter((r) => r.type === "quiz" && inClub(r, S.club)));
+  const list = recentFirst(gres().filter((r) => r.type === "quiz" && inClub(r, S.club)));
   return `<div class="hero"><small>${t("quizzes")}</small><b>${t("quizTitle")}</b><span>${t("quizAll")}</span></div>${resultsBlock()}${list.map((r) => resTile({ ...r, desc: [r.lo, r.desc].filter(Boolean).join(" · ") })).join("") || empty()}`;
 }
 function revisionScreen() {
-  const list = S.resources.filter((r) => ["revision", "exam"].includes(r.type) && inClub(r, S.club));
+  const list = gres().filter((r) => ["revision", "exam"].includes(r.type) && inClub(r, S.club));
   const groups = [["revision", "revisionMaterial"], ["exam", "exams"]].map(([ty, label]) => {
     const items = recentFirst(list.filter((r) => r.type === ty));
     if (!items.length) return "";
@@ -566,7 +602,7 @@ function revisionScreen() {
   return `<div class="hero"><small>${t("revision")}</small><b>${t("revisionTitle")}</b><span>${t("revisionAll")}</span></div>${groups || empty()}`;
 }
 function jointScreen() {
-  const res = recentFirst(S.resources.filter((r) => isShared(r) && inClub(r, S.club) && !OWN_PAGE.includes(r.type))).map((r) => ({ ...r, desc: [clubsLabel(r), r.desc].filter(Boolean).join(" · ") }));
+  const res = recentFirst(gres().filter((r) => isShared(r) && inClub(r, S.club) && !OWN_PAGE.includes(r.type))).map((r) => ({ ...r, desc: [clubsLabel(r), r.desc].filter(Boolean).join(" · ") }));
   const evs = upcoming(S.events.filter((e) => isShared(e) && inClub(e, S.club)));
   return `<div class="hero joint"><small>${t("shared")} · ${t(S.club)}</small><b>${t("jointTitle")}</b><span>${t("jointBlurb")}</span></div>
   <h2>${t("sharedMaterials")}</h2>${loSections("joint", res, false) || empty()}<h2>${t("jointEvents")}</h2>${evs.map(evTile).join("") || empty()}`;
@@ -606,9 +642,9 @@ function admOpen(kind, it, req) {
   A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.editId = it ? it.id : "";
   const def = mine.includes(S.club) ? [S.club] : mine.slice(0, 1);
   A.form = it
-    ? { clubs: it.clubs[0] === "*" ? ["all"] : [...it.clubs], title: it.title || "", date: it.ds || "", time: it.time || "", place: it.place || "", note: it.note || "", type: it.type || "file", description: it.desc || "", url: it.url || "", lo: it.lo || "", reqnote: "" }
-    : { clubs: def, title: "", date: "", time: "", place: "", note: "", type: "file", description: "", url: "", lo: "", reqnote: "" };
-  if (kind === "quiz") A.form = { clubs: def, title: "", lo: "", attempts: "0", questions: [newQ()] };
+    ? { clubs: it.clubs[0] === "*" ? ["all"] : [...it.clubs], title: it.title || "", date: it.ds || "", time: it.time || "", place: it.place || "", note: it.note || "", type: it.type || "file", description: it.desc || "", url: it.url || "", lo: it.lo || "", grades: gradesToForm(it.grades), reqnote: "" }
+    : { clubs: def, title: "", date: "", time: "", place: "", note: "", type: "file", description: "", url: "", lo: "", grades: ["all"], reqnote: "" };
+  if (kind === "quiz") A.form = { clubs: def, title: "", lo: "", grades: ["all"], attempts: "0", questions: [newQ()] };
   render();
 }
 async function admEditQuiz(id) {
@@ -618,7 +654,7 @@ async function admEditQuiz(id) {
     if (r.ok) {
       const q = r.quiz, cl = parseClubs(q.club);
       A.kind = "quiz"; A.editId = q.id; A.req = false; A.err = "";
-      A.form = { clubs: cl[0] === "*" ? ["all"] : cl, title: q.title, lo: q.lo || "", attempts: String(q.attempts || 0), questions: q.questions.map((x) => ({ q: x.q, options: [...x.options], correct: x.correct, explain: x.explain || "" })) };
+      A.form = { clubs: cl[0] === "*" ? ["all"] : cl, title: q.title, lo: q.lo || "", grades: gradesToForm(parseGrades(q.grade)), attempts: String(q.attempts || 0), questions: q.questions.map((x) => ({ q: x.q, options: [...x.options], correct: x.correct, explain: x.explain || "" })) };
       render(); return;
     }
     if (r.error === "auth") { signOut(); return; }
@@ -633,7 +669,7 @@ async function admSave() {
   const club = f.clubs.join("+");
   const item = A.kind === "event"
     ? { club, title: f.title, date: f.date, time: f.time, place: f.place, note: f.note }
-    : { club, type: f.type, title: f.title, description: f.description, url: f.url, lo: f.lo, date: f.date };
+    : { club, type: f.type, title: f.title, description: f.description, url: f.url, lo: f.lo, date: f.date, grade: gradeStr(f) };
   if (A.req && (f.clubs.length < 2 || !f.clubs.some((c) => myClubs().includes(c)))) { A.err = t("err_need_two"); render(true); return; }
   A.busy = true; render(true);
   try {
@@ -662,7 +698,7 @@ async function admSaveQuiz() {
   if (!okQ) { A.err = t("err_invalid_questions"); render(true); return; }
   A.busy = true; render(true);
   try {
-    const r = await api("adminQuizSave", { token: S.user.token, id: A.editId || undefined, item: { club: f.clubs.join("+"), title: f.title, lo: f.lo, attempts: +f.attempts || 0, questions: f.questions } });
+    const r = await api("adminQuizSave", { token: S.user.token, id: A.editId || undefined, item: { club: f.clubs.join("+"), title: f.title, lo: f.lo, grade: gradeStr(f), attempts: +f.attempts || 0, questions: f.questions } });
     if (r.ok) { A.form = null; A.busy = false; toast(t("saved"), 2000); render(); loadAll(); return; }
     if (r.error === "auth") { signOut(); return; }
     if (r.error === "forbidden") refreshMe();
@@ -772,6 +808,8 @@ async function admSaveRole() {
 
 const clubBoxes = (f, pool, withAll) => [...(withAll ? [{ id: "all", label: t("fAll") }] : []), ...pool.map((c) => ({ id: c.id, label: t(c.id) }))]
   .map((c) => `<label class="chk"><input type="checkbox" data-afc="${esc(c.id)}"${f.clubs.includes(c.id) ? " checked" : ""}>${esc(c.label)}</label>`).join("");
+const gradeBoxes = (f) => [{ id: "all", label: t("fAllGrades") }, ...GRADES.map((g) => ({ id: g, label: gradeName(g) }))]
+  .map((c) => `<label class="chk"><input type="checkbox" data-afg="${esc(c.id)}"${(f.grades || []).includes(c.id) ? " checked" : ""}>${esc(c.label)}</label>`).join("");
 const clubPool = () => (S.adm.req || isSuper() ? CLUB_LIST : CLUB_LIST.filter((c) => myClubs().includes(c.id)));
 
 function adminForm() {
@@ -792,7 +830,7 @@ function adminForm() {
   const reqNote = A.req ? inp("reqnote", t("reqNote"), "text", 'maxlength="300"') : "";
   const head = A.req ? t(ev ? "reqEvent" : "reqMat") : t(ev ? "fhEvent" : "fhRes");
   return `<h2>${head}</h2>
-  <form id="adm-form" class="form">${reqExtra}<label>${t("fClubs")}</label><div class="checks">${boxes}</div>${fields}${reqNote}
+  <form id="adm-form" class="form">${reqExtra}<label>${t("fClubs")}</label><div class="checks">${boxes}</div>${ev ? "" : `<label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>`}${fields}${reqNote}
     ${A.err ? `<div class="warn" role="alert">${esc(A.err)}</div>` : ""}
     <button class="btn" type="submit"${A.busy || A.uploading ? " disabled" : ""}>${A.busy ? t("saving") : t(A.req ? "reqSend" : "save")}</button>
     <button class="btn ghost" type="button" data-adm="cancel">${t("cancel")}</button></form>`;
@@ -807,7 +845,7 @@ function quizForm() {
     ${q.options.length < 6 ? `<button type="button" class="mini" data-adm="opt-add" data-qi="${i}">${t("addOption")}</button>` : ""}
     <input data-aq="explain" data-qi="${i}" value="${esc(q.explain)}" maxlength="300" dir="auto" placeholder="${esc(t("explainLbl"))}"></div>`).join("");
   return `<h2>${t("fhQuiz")}</h2>
-  <form id="adm-form" class="form"><label>${t("fClubs")}</label><div class="checks">${boxes}</div>
+  <form id="adm-form" class="form"><label>${t("fClubs")}</label><div class="checks">${boxes}</div><label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>
     <label for="af-title">${t("fTitle")}</label><input id="af-title" data-af="title" value="${esc(f.title)}" required maxlength="120" dir="auto">
     <label for="af-lo">${t("fLo")}</label><input id="af-lo" data-af="lo" value="${esc(f.lo)}" maxlength="80" dir="auto">
     <label for="af-attempts">${t("attemptsLbl")}</label><select id="af-attempts" data-af="attempts">${[["0", t("attemptsUnl")], ["1", "1"], ["2", "2"], ["3", "3"]].map(([v, l]) => `<option value="${v}"${String(f.attempts) === v ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
@@ -842,8 +880,8 @@ function admContent() {
   const legacy = isSuper() && (S.events.some((e) => !e.id) || S.resources.some((r) => !r.id && !r.native));
   const btn = (act, kind, id, label, cls) => `<button class="mini${cls ? " " + cls : ""}" data-adm="${act}" data-kind="${kind}" data-id="${esc(id)}">${label}</button>`;
   const evRow = (e) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(e.title)}</b><span dir="auto">${esc([shortDate(e.date), e.time, clubsLabel(e)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("edit", "event", e.id, t("edit"))}${btn("del", "event", e.id, t("del"), "danger")}</div></div>`;
-  const resRow = (r) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc([t(TYPE_KEY[r.type] || "refs"), clubsLabel(r), shortDate(r.date)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("edit", "resource", r.id, t("edit"))}${btn("del", "resource", r.id, t("del"), "danger")}</div></div>`;
-  const qzRow = (q) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(q.title)}</b><span dir="auto">${esc([`${q.count} ${t("questionsWord")}`, clubsLabel(q)].join(" · "))}</span></div><div class="row-actions">${btn("qedit", "quiz", q.qid, t("edit"))}${btn("qres", "quiz", q.qid, t("results"))}${btn("del", "quiz", q.qid, t("del"), "danger")}</div></div>`;
+  const resRow = (r) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc([t(TYPE_KEY[r.type] || "refs"), clubsLabel(r), gradesLabel(r), shortDate(r.date)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("edit", "resource", r.id, t("edit"))}${btn("del", "resource", r.id, t("del"), "danger")}</div></div>`;
+  const qzRow = (q) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(q.title)}</b><span dir="auto">${esc([`${q.count} ${t("questionsWord")}`, clubsLabel(q), gradesLabel(q)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("qedit", "quiz", q.qid, t("edit"))}${btn("qres", "quiz", q.qid, t("results"))}${btn("del", "quiz", q.qid, t("del"), "danger")}</div></div>`;
   const shared = isSuper() ? "" : `<h2>${t("reqTitle")}</h2><p class="note" style="text-align:start;padding:0">${t("reqHint")}</p>
     <div class="grid"><button class="btn ghost" data-adm="add" data-kind="event" data-req="1" style="margin:0">${t("reqEvent")}</button><button class="btn ghost" data-adm="add" data-kind="resource" data-req="1" style="margin:0">${t("reqMat")}</button></div>
     ${A.reqs.length ? `<h2>${t("myRequests")}</h2>${A.reqs.map((r) => reqTile(r, false)).join("")}` : ""}`;
@@ -924,7 +962,7 @@ async function openQuiz(id) {
     if (S.qz !== Q) return;
     if (r.ok) {
       Object.assign(Q, { title: r.quiz.title, questions: r.quiz.questions, attempts: r.quiz.attempts, used: r.quiz.used, answers: r.quiz.questions.map(() => -1) });
-      if (Q.attempts && Q.used >= Q.attempts) { Q.state = "error"; Q.err = t("err_attempts_done"); } else Q.state = "ready";
+      if (Q.attempts && Q.used >= Q.attempts) { Q.state = "error"; Q.err = t("err_attempts_done"); } else { Q.state = "ready"; qzMark(Q); }
     } else if (r.error === "auth") { signOut(); return; }
     else { Q.state = "error"; Q.err = t("qzLoadErr"); }
   } catch { Q.state = "error"; Q.err = t("err_generic"); }
@@ -936,10 +974,10 @@ async function submitQuiz() {
   Q.state = "submitting"; render(true);
   try {
     const r = await api("quizSubmit", { token: S.user.token, id: Q.id, answers: Q.answers });
-    if (r.ok) { Q.result = r; Q.used += 1; Q.state = "result"; loadResults(); }
+    if (r.ok) { Q.result = r; Q.used += 1; Q.state = "result"; qzUnmark(); loadResults(); }
     else if (r.error === "auth") { signOut(); return; }
-    else { Q.state = "error"; Q.err = admErr(r); }
-  } catch { Q.state = "error"; Q.err = t("err_generic"); }
+    else { Q.state = "error"; Q.err = admErr(r); qzUnmark(); }
+  } catch { Q.state = "ready"; toast(t("err_generic"), 3000); } // network hiccup: let the student press submit again
   render();
   document.querySelector("main")?.scrollTo?.(0, 0);
 }
@@ -967,16 +1005,70 @@ function quizScreen() {
   if (Q.state === "loading") return `<p class="note">${t("loadingRes")}</p>`;
   if (Q.state === "error") return `<div class="warn" role="alert">${esc(Q.err)}</div>${back}`;
   if (Q.state === "result") return quizResult();
+  if (Q.state === "cancelled") return quizCancelled();
   const nf = new Intl.NumberFormat(locale());
   const left = Q.attempts ? `${t("attemptsLeft")}: ${nf.format(Q.attempts - Q.used)}` : "";
   const items = Q.questions.map((q, i) => `<div class="lo" style="padding:14px;display:flex;flex-direction:column;gap:8px"><b dir="auto" style="font-size:15px">${nf.format(i + 1)}. ${esc(q.q)}</b>
     ${q.options.map((o, j) => `<label class="opt"><input type="radio" name="qz${i}" data-qza="${i}" value="${j}"${Q.answers[i] === j ? " checked" : ""}><span dir="auto">${esc(o)}</span></label>`).join("")}</div>`).join("");
   const ready = Q.answers.every((a) => a >= 0);
   return `<div class="hero"><small>${t("quizzes")}</small><b dir="auto">${esc(Q.title)}</b><span>${nf.format(Q.questions.length)} ${t("questionsWord")}${left ? " · " + esc(left) : ""}</span></div>
+    ${isAdmin() ? "" : `<div class="warn" role="note">${t("qzWarnNote")}</div>`}
     ${items}
     ${isAdmin() ? `<div class="warn" role="note">${t("previewQuizNote")}</div>` : ""}
     <p class="note" id="qz-hint"${ready ? " hidden" : ""}>${t("qzAnswerAll")}</p>
     <button class="btn" id="qz-submit" data-qzs${ready && Q.state === "ready" && !isAdmin() ? "" : " disabled"}>${Q.state === "submitting" ? t("saving") : t("qzSubmit")}</button>${back}`;
+}
+
+// ---- quiz lock: leaving a quiz in progress cancels the attempt and the score is 0 ----
+// The server also treats any quiz that was opened but never submitted as 0 (quizGet starts the attempt),
+// so this works even when the phone kills the app before the "cancel" request gets out.
+const QZ_KEY = "qzActive";
+const qzMark = (Q) => { if (!isAdmin()) store.set(QZ_KEY, JSON.stringify({ id: Q.id, u: S.user?.username || "" })); };
+const qzUnmark = () => store.set(QZ_KEY, "");
+function qzSend(id, token) {
+  // sendBeacon survives the page being closed; fetch with keepalive is the fallback
+  const body = JSON.stringify({ action: "quizAbandon", token, id });
+  try { if (navigator.sendBeacon && navigator.sendBeacon(CFG.API_URL, new Blob([body], { type: "text/plain;charset=utf-8" }))) return; } catch {}
+  try { fetch(CFG.API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body, keepalive: true }).catch(() => {}); } catch {}
+}
+function lockQuiz() {
+  const Q = S.qz;
+  if (!CFG.API_URL || !S.user || !Q || Q.state !== "ready" || Q.leaving || isAdmin()) return;
+  Q.state = "cancelled"; Q.used += 1;
+  qzSend(Q.id, S.user.token); // the stored marker stays until the server confirms it (qzRecover)
+  render();
+}
+// runs when the app opens or comes back: confirms any cancelled quiz with the server, then clears the marker
+async function qzRecover() {
+  let m; try { m = JSON.parse(store.get(QZ_KEY, "")); } catch { m = null; }
+  if (!m || !CFG.API_URL || !S.user || m.u !== S.user.username) return;
+  if (S.qz && S.qz.id === m.id && ["ready", "submitting"].includes(S.qz.state)) return; // still taking it
+  try {
+    const r = await api("quizAbandon", { token: S.user.token, id: m.id });
+    if (r.error === "auth") { signOut(); return; }
+    qzUnmark();
+    loadResults();
+    if (!S.qz || S.qz.id !== m.id) toast(t("qzCancelledToast"), 4000);
+  } catch {}
+}
+// in-app navigation away from a quiz in progress: ask first, then cancel it
+function guardLeave() {
+  const Q = S.qz;
+  if (S.tab !== "quiz" || !Q || Q.state !== "ready" || isAdmin()) return true;
+  Q.leaving = true; // the confirm box itself takes focus away, ignore that
+  const ok = confirm(t("qzLeaveConfirm"));
+  Q.leaving = false;
+  if (!ok) return false;
+  lockQuiz();
+  return true;
+}
+function quizCancelled() {
+  const Q = S.qz, nf = new Intl.NumberFormat(locale());
+  const canRetry = !Q.attempts || Q.used < Q.attempts;
+  return `<div class="hero" style="background:#B42318"><small>${t("qzCancelled")}</small><b dir="ltr">${nf.format(0)} / ${nf.format(Q.questions.length)} (${nf.format(0)}%)</b><span dir="auto">${esc(Q.title)}</span></div>
+    <div class="warn" role="alert">${t("qzCancelledNote")}</div>
+    ${canRetry ? `<button class="btn" data-qz="${esc(Q.id)}">${t("qzRetake")}</button>` : `<div class="warn" role="note">${t("err_attempts_done")}</div>`}
+    <button class="btn ghost" data-go="quizzes" style="margin-top:0">${t("qzBack")}</button>`;
 }
 
 // ---- events for admin and quiz screens ----
@@ -1027,6 +1119,10 @@ document.addEventListener("change", (e) => {
     const c = d.afc, cur = A.form.clubs;
     if (el.checked) { A.form.clubs = c === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), c]; if (c === "all" || cur.includes("all")) render(true); }
     else A.form.clubs = cur.filter((x) => x !== c);
+  } else if (d.afg && A.form) {
+    const g = d.afg, cur = A.form.grades || [];
+    if (el.checked) { A.form.grades = g === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), g]; if (g === "all" || cur.includes("all")) render(true); }
+    else A.form.grades = cur.filter((x) => x !== g);
   } else if (d.af === "type" && A.form) { A.form.type = el.value; render(true); }
   else if (el.hasAttribute?.("data-af-file")) admUpload(el.files && el.files[0]);
   else if (d.arc && A.roleEdit) {
@@ -1047,8 +1143,17 @@ function previewBar() {
   const cur = CHILD.includes(S.tab) ? "home" : S.tab;
   return `<div class="warn" role="note">${t("previewBanner")}</div><div class="seg" role="group">${["home", "library", "events"].map((k) => `<button data-go="${k}" class="${cur === k ? "on" : ""}">${t(k)}</button>`).join("")}</div>`;
 }
+// The grade picker sits at the top of every club page; the choice is saved on the phone.
+const GRADE_TABS = ["home", "library", "references", "quizzes", "revision", "joint"];
+function gradeBar() {
+  if (!GRADES.length || !GRADE_TABS.includes(S.tab)) return "";
+  const opts = [["all", t("gradeAll")], ...GRADES.map((g) => [g, gradeName(g)])];
+  return `<div class="seg grades" role="group" aria-label="${esc(t("gradeWord"))}">${opts.map(([k, l]) => `<button data-grade="${esc(k)}" class="${S.grade === k ? "on" : ""}" aria-pressed="${S.grade === k}">${esc(l)}</button>`).join("")}</div>`;
+}
 function navHtml() {
   if (gate()) return "";
+  // while a quiz is being taken there is no way out except the confirmed "leave" button
+  if (S.tab === "quiz" && S.qz && ["ready", "submitting"].includes(S.qz.state) && !isAdmin()) return "";
   const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
   const on = (k) => (isAdmin() ? (k === "preview" ? inPreview : S.tab === k) : S.tab === k || (k === "home" && CHILD.includes(S.tab)));
   const items = isAdmin() ? [["admin", "settings"], ["preview", "eye"], ["account", "user"]] : [["home", "home"], ["library", "book"], ["events", "cal"], ...(CFG.API_URL ? [["support", "support"], ["account", "user"]] : [])];
@@ -1091,7 +1196,7 @@ function render(keep) {
   app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
     <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="icon-btn" data-act="lang">${t("lang")}</button></div>
     ${showSwitch && vis.length + LINK_CLUBS.length > 1 ? `<div class="switch" role="group">${vis.map((c) => `<button data-club="${c.id}" class="${S.club === c.id ? "on" : ""}" aria-pressed="${S.club === c.id}"${S.club === c.id ? ` style="background:${c.color}"` : ""}>${t(c.id)}</button>`).join("")}${LINK_CLUBS.map((c) => `<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(t(c.id) + " (" + t("extSite") + ")")}">${t(c.id)} <span aria-hidden="true">↗</span></a>`).join("")}</div>` : ""}</header>
-  <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${screens[S.tab]()}</main>
+  <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${gradeBar()}${screens[S.tab]()}</main>
   ${navHtml()}`;
   if (prev) document.querySelector("main").scrollTop = prev;
   document.querySelector(".switch button.on")?.scrollIntoView({ inline: "center", block: "nearest" });
@@ -1099,13 +1204,16 @@ function render(keep) {
 }
 
 document.addEventListener("click", (e) => {
-  const el = e.target.closest("[data-go],[data-club],[data-act],[data-filter-set],[data-lo],[data-acct-mode]");
+  const el = e.target.closest("[data-go],[data-club],[data-grade],[data-act],[data-filter-set],[data-lo],[data-acct-mode]");
   // the <html> element carries data-club too, so ignore anything outside the app
   if (!el || !document.getElementById("app").contains(el)) return;
+  // leaving a quiz that is in progress needs a confirmation and cancels it (score 0)
+  if ((el.dataset.go !== undefined || el.dataset.club || el.dataset.act === "signout") && !guardLeave()) return;
   if (el.dataset.lo) { S.open[el.dataset.lo] = el.dataset.open !== "1"; render(true); return; }
   if (el.dataset.acctMode) { S.acct.mode = el.dataset.acctMode; S.acct.err = ""; render(); return; }
   if (el.dataset.act === "signout") { signOut(); return; }
   if (el.dataset.club) { S.club = el.dataset.club; store.set("club", S.club); }
+  else if (el.dataset.grade) { S.grade = el.dataset.grade; store.set("grade", S.grade); }
   else if (el.dataset.filterSet) S.filter = el.dataset.filterSet;
   else if (el.dataset.go) { S.supOk = false; S.supErr = ""; S.tab = el.dataset.go; S.filter = el.dataset.filter || "all"; S.q = ""; }
   else if (el.dataset.act === "lang") { S.lang = S.lang === "ar" ? "en" : "ar"; store.set("lang", S.lang); }
@@ -1126,9 +1234,14 @@ document.addEventListener("submit", (e) => {
 });
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { loadAll(); if (S.tab === "quizzes") loadResults(); if (S.user) { loadSupport(); loadAdminInbox(); } } });
 
+// leaving a quiz in progress (switching apps, locking the screen, closing the app) cancels it
+document.addEventListener("visibilitychange", () => { if (document.hidden) lockQuiz(); else qzRecover(); });
+window.addEventListener("pagehide", lockQuiz);
+window.addEventListener("blur", lockQuiz);
+
 render();
 loadAll();
-if (S.user) { loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); }
+if (S.user) { loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); qzRecover(); }
 // check for team replies every minute while the app is open
 setInterval(() => { if (!document.hidden && S.user && CFG.API_URL) { loadSupport(); loadAdminInbox(); } }, 60000);
 // ---- self-update: when a new version is published the app refreshes itself, nobody has to clear site data ----

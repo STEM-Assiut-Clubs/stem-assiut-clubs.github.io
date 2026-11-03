@@ -16,6 +16,9 @@ window.APP_CONFIG = {
   // To add a club: add a line here, its name in T (app.js), and use the id in the sheet's "club" column.
   // "joint" القديمة في الشيت = النوادي دي بس / legacy "joint" rows in the sheet mean only these clubs
   JOINT_CLUBS: ["chemistry", "physics"],
+  // الجرايد اللي الطالب بيختار منها جوه تاب المادة. لازم عمود grade في الشيتات يحتوي واحد منهم (أو 10+11 أو all).
+  // Grades the student picks from inside a club tab. The "grade" column holds one of these (or 10+11, or all).
+  GRADES: ["10", "11", "12"],
   CLUBS: [
     { id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC", logo: "icons/chemistry_logo.png" },
     { id: "physics",   color: "#1F5FD1", tint: "#E8F0FD", logo: "icons/physics_logo.png" },
