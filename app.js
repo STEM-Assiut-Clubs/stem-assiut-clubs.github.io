@@ -63,7 +63,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: "Upload a file (max 8 MB) or paste a link below", uploading: "Uploading…", uploaded: "Uploaded ✓", err_too_big: "File is too big (max 8 MB).", err_invalid_file: "This file type isn't allowed.",
+  uploadFile: "Pick a file from your device (max 8 MB), or paste a link below", uploading: "Uploading…", uploaded: "Uploaded ✓", err_too_big: "File is too big (max 8 MB).", err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -79,7 +79,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: "ارفع ملف (حد أقصى 8 ميجا) أو الصق لينك تحت", uploading: "جاري الرفع…", uploaded: "اترفع ✓", err_too_big: "الملف كبير (الحد الأقصى 8 ميجا).", err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: "اختار ملف من جهازك (حد أقصى 8 ميجا)، أو الصق لينك تحت", uploading: "جاري الرفع…", uploaded: "اترفع ✓", err_too_big: "الملف كبير (الحد الأقصى 8 ميجا).", err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -111,7 +111,9 @@ Object.assign(T.ar, {
 });
 
 Object.assign(T.en, {
-  gradeWord: "Grade", gradeAll: "All grades", fGrades: "Grade(s)", fAllGrades: "All grades",
+  gradeWord: "Grade", fGrades: "Grade(s)", fAllGrades: "All grades (shown in every grade tab)",
+  chooseFile: "Choose a file from this device", fileTypesHint: "PDF, Word, PowerPoint, Excel, image, text or MP4",
+  err_drive_error: "The file could not be saved on the server.",
   qzCancelled: "Quiz cancelled", qzCancelledNote: "You left the quiz screen, so this attempt was cancelled and your score is 0.",
   qzLeaveConfirm: "Leave the quiz? This attempt will be cancelled and your score will be 0.",
   qzWarnNote: "Stay on this screen. If you switch apps, lock your phone or close the app, the quiz is cancelled and your score is 0.",
@@ -119,7 +121,9 @@ Object.assign(T.en, {
   err_no_attempt: "This attempt was already cancelled. Open the quiz again to start a new one.",
 });
 Object.assign(T.ar, {
-  gradeWord: "جريد", gradeAll: "كل الجرايد", fGrades: "الجريد", fAllGrades: "كل الجرايد",
+  gradeWord: "جريد", fGrades: "الجريد", fAllGrades: "كل الجرايد (بيظهر في تاب كل جريد)",
+  chooseFile: "اختار ملف من الجهاز", fileTypesHint: "PDF أو Word أو PowerPoint أو Excel أو صورة أو نص أو MP4",
+  err_drive_error: "الملف ماتحفظش على السيرفر.",
   qzCancelled: "الكويز اتلغى", qzCancelledNote: "خرجت من شاشة الكويز، فالمحاولة دي اتلغت ودرجتك صفر.",
   qzLeaveConfirm: "تخرج من الكويز؟ المحاولة هتتلغي ودرجتك هتبقى صفر.",
   qzWarnNote: "خليك في الشاشة دي. لو غيّرت التطبيق أو قفلت الموبايل أو قفلت التطبيق، الكويز بيتلغي ودرجتك صفر.",
@@ -127,7 +131,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "2026.11.03-grades-quiz-lock-2";
+const VERSION = "2026.11.03-grade-tabs-upload";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -135,7 +139,7 @@ const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
 const GRADES = (CFG.GRADES || ["10", "11", "12"]).map(String);
 const S = {
   club: clubInfo(store.get("club", "")) ? store.get("club", "") : CLUB_LIST[0].id,
-  grade: GRADES.includes(store.get("grade", "")) ? store.get("grade", "") : "all",
+  grade: GRADES.includes(store.get("grade", "")) ? store.get("grade", "") : GRADES[0], // one of the grade tabs; there is no "all grades" tab
   tab: "home", filter: "all", q: "", open: {},
   lang: store.get("lang", (navigator.language || "en").startsWith("ar") ? "ar" : "en"),
   resources: [], events: [], quizzes: [], qz: null, live: true,
@@ -156,7 +160,7 @@ const visibleIds = () => {
 const visClubs = () => CLUB_LIST.filter((c) => visibleIds().includes(c.id));
 const gate = () => (!CFG.API_URL ? "" : !S.user ? "login" : S.user.temp ? "password" : "");
 const seesItem = (x) => !CFG.API_URL || S.user?.role?.super || x.clubs.includes("*") || x.clubs.some((c) => visibleIds().includes(c));
-const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
+const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", upName: "", reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
 S.adm = newAdm();
 S.pw = { old: "", new: "", err: "", busy: false };
 S.preview = false;
@@ -254,7 +258,8 @@ const gradeStr = (f) => (!f.grades?.length || f.grades.includes("all") ? "all" :
 const gradeName = (g) => `${t("gradeWord")} ${new Intl.NumberFormat(locale()).format(+g)}`;
 const gradesLabel = (x) => (!x.grades || x.grades.includes("*") ? "" : x.grades.map(gradeName).join(" + "));
 // الطالب شايف اللي ليه: المحتوى من غير جريد بيظهر لكل الجرايد / content with no grade shows for every grade
-const inGrade = (x) => S.grade === "all" || !x.grades || x.grades.includes("*") || x.grades.includes(S.grade);
+// An item shared by several grades (or with no grade) is simply listed again inside each grade tab, never in a tab of its own.
+const inGrade = (x) => !GRADES.length || !x.grades || x.grades.includes("*") || x.grades.includes(S.grade);
 const gres = () => S.resources.filter(inGrade);
 const TYPES = { file: "file", "ملف": "file", video: "video", "فيديو": "video", reference: "reference", link: "reference", revision: "revision", "مراجعة": "revision", exam: "exam", "امتحان": "exam", quiz: "quiz", "كويز": "quiz", "اختبار": "quiz", "مرجع": "reference", "لينك": "reference" };
 function parseDate(s) { const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
@@ -281,7 +286,7 @@ async function loadApiContent() {
   } catch { try { return { live: false, data: JSON.parse(store.get(cacheKey(), "")) }; } catch { return { live: false, data: null }; } }
 }
 const mapQuiz = (x, i) => ({ id: "", qid: x.id, native: true, clubs: parseClubs(x.club), type: "quiz", title: x.title, desc: "", lo: x.lo || "", url: "", date: parseDate(x.date), ds: x.date || "", grades: parseGrades(x.grade), attempts: +x.attempts || 0, count: x.count || 0, i: 40000 + i });
-const mapEv = (x) => ({ id: x.id || "", clubs: parseClubs(x.club), title: x.title, date: parseDate(x.date), ds: x.date || "", time: x.time, place: x.place, note: x.note });
+const mapEv = (x) => ({ id: x.id || "", clubs: parseClubs(x.club), title: x.title, date: parseDate(x.date), ds: x.date || "", time: x.time, place: x.place, note: x.note, grades: parseGrades(x.grade) });
 async function loadAll() {
   // Content comes from the app's own sheets (via the API). The old published CSV sheets still load too
   // unless LEGACY_CSV is false in config.js. Items that exist in both places show once.
@@ -565,7 +570,7 @@ const OWN_PAGE = ["reference", "revision", "exam", "quiz"]; // these never appea
 
 // ---- screens ----
 function home() {
-  const evs = upcoming(S.events.filter((e) => inClub(e, S.club)));
+  const evs = upcoming(S.events.filter((e) => inClub(e, S.club) && inGrade(e)));
   const next = evs[0];
   const when = next ? new Intl.DateTimeFormat(locale(), { weekday: "long", day: "numeric", month: "long" }).format(next.date) + [next.time && " · " + next.time, next.place && " · " + next.place].filter(Boolean).join("") : "";
   const recent = recentFirst(gres().filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type))).slice(0, 3);
@@ -581,7 +586,7 @@ function library() {
   ${loSections(S.club, items, !!q) || empty()}`;
 }
 function eventsScreen() {
-  const list = upcoming(S.events.filter((e) => inClub(e, S.club)));
+  const list = upcoming(S.events.filter((e) => inClub(e, S.club) && inGrade(e)));
   return `<h2>${t("upcoming")}</h2>${list.map(evTile).join("") || empty()}`;
 }
 function referencesScreen() {
@@ -605,7 +610,7 @@ function revisionScreen() {
 }
 function jointScreen() {
   const res = recentFirst(gres().filter((r) => isShared(r) && inClub(r, S.club) && !OWN_PAGE.includes(r.type))).map((r) => ({ ...r, desc: [clubsLabel(r), r.desc].filter(Boolean).join(" · ") }));
-  const evs = upcoming(S.events.filter((e) => isShared(e) && inClub(e, S.club)));
+  const evs = upcoming(S.events.filter((e) => isShared(e) && inClub(e, S.club) && inGrade(e)));
   return `<div class="hero joint"><small>${t("shared")} · ${t(S.club)}</small><b>${t("jointTitle")}</b><span>${t("jointBlurb")}</span></div>
   <h2>${t("sharedMaterials")}</h2>${loSections("joint", res, false) || empty()}<h2>${t("jointEvents")}</h2>${evs.map(evTile).join("") || empty()}`;
 }
@@ -641,7 +646,7 @@ async function refreshMe() {
 
 function admOpen(kind, it, req) {
   const A = S.adm, mine = myClubs();
-  A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.editId = it ? it.id : "";
+  A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.upName = ""; A.editId = it ? it.id : "";
   const def = mine.includes(S.club) ? [S.club] : mine.slice(0, 1);
   A.form = it
     ? { clubs: it.clubs[0] === "*" ? ["all"] : [...it.clubs], title: it.title || "", date: it.ds || "", time: it.time || "", place: it.place || "", note: it.note || "", type: it.type || "file", description: it.desc || "", url: it.url || "", lo: it.lo || "", grades: gradesToForm(it.grades), reqnote: "" }
@@ -670,7 +675,7 @@ async function admSave() {
   if (!f.clubs.length) { A.err = t("err_invalid_club"); render(true); return; }
   const club = f.clubs.join("+");
   const item = A.kind === "event"
-    ? { club, title: f.title, date: f.date, time: f.time, place: f.place, note: f.note }
+    ? { club, title: f.title, date: f.date, time: f.time, place: f.place, note: f.note, grade: gradeStr(f) }
     : { club, type: f.type, title: f.title, description: f.description, url: f.url, lo: f.lo, date: f.date, grade: gradeStr(f) };
   if (A.req && (f.clubs.length < 2 || !f.clubs.some((c) => myClubs().includes(c)))) { A.err = t("err_need_two"); render(true); return; }
   A.busy = true; render(true);
@@ -717,18 +722,23 @@ async function admDelete(kind, id) {
     toast(admErr(r), 3000);
   } catch { toast(t("err_generic"), 3000); }
 }
+// The file picker has no "accept" filter on purpose: a filter that lists images makes many Android phones open the
+// photo picker (photos only) instead of the Files picker. The file type is checked here after the file is chosen.
+const UPLOAD_EXTS = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "png", "jpg", "jpeg", "txt", "mp4"];
 async function admUpload(file) {
   const A = S.adm;
   if (!file || !A.form) return;
-  if (file.size > 8 * 1024 * 1024) { A.err = t("err_too_big"); render(true); return; }
-  A.err = ""; A.uploading = file.name; render(true);
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  if (!UPLOAD_EXTS.includes(ext)) { A.err = t("err_invalid_file") + " (" + UPLOAD_EXTS.join(", ") + ")"; A.upName = ""; render(true); return; }
+  if (file.size > 8 * 1024 * 1024) { A.err = t("err_too_big"); A.upName = ""; render(true); return; }
+  A.err = ""; A.upName = ""; A.uploading = file.name; render(true);
   try {
     const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1] || ""); fr.onerror = () => rej(new Error("read")); fr.readAsDataURL(file); });
     const club = A.form.clubs.find((c) => myClubs().includes(c)) || A.form.clubs[0] || "";
     const r = await api("adminUpload", { token: S.user.token, name: file.name, data, club });
-    if (r.ok) { A.form.url = r.url; if (!A.form.title) A.form.title = r.name.replace(/\.[^.]+$/, ""); toast(t("uploaded"), 2000); }
+    if (r.ok) { A.form.url = r.url; A.upName = file.name; if (!A.form.title) A.form.title = r.name.replace(/\.[^.]+$/, ""); toast(t("uploaded"), 2000); }
     else if (r.error === "auth") { signOut(); return; }
-    else A.err = admErr(r);
+    else A.err = admErr(r) + (r.detail ? " (" + r.detail + ")" : ""); // admins see the real reason from the server
   } catch { A.err = t("err_generic"); }
   A.uploading = ""; render(true);
 }
@@ -825,14 +835,16 @@ function adminForm() {
     ? inp("title", t("fTitle"), "text", 'required maxlength="120"') + inp("date", t("fDate"), "date", "required") + inp("time", t("fTime"), "time") + inp("place", t("fPlace"), "text", 'maxlength="80"') + inp("note", t("fNote"), "text", 'maxlength="200"')
     : `<label for="af-type">${t("fType")}</label><select id="af-type" data-af="type">${types}</select>`
       + inp("title", t("fTitle"), "text", 'required maxlength="120"')
-      + `<label for="af-file">${t("uploadFile")}</label><input id="af-file" type="file" data-af-file accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.mp4">${A.uploading ? `<p class="note" style="text-align:start">${t("uploading")} ${esc(A.uploading)}</p>` : ""}`
+      + `<label>${t("uploadFile")}</label><input id="af-file" class="vh" type="file" data-af-file><label class="btn ghost filebtn" for="af-file">📎 ${t("chooseFile")}</label>`
+      + `<p class="note" style="text-align:start;padding:0">${t("fileTypesHint")}</p>`
+      + (A.uploading ? `<p class="note" style="text-align:start" role="status">${t("uploading")} ${esc(A.uploading)}</p>` : A.upName ? `<p class="note" style="text-align:start" role="status">✓ ${esc(A.upName)}</p>` : "")
       + inp("url", t("fUrl"), "url", 'required dir="ltr" placeholder="https://"')
       + inp("description", t("fDesc"), "text", 'maxlength="300"') + inp("lo", t("fLo"), "text", 'maxlength="80"') + inp("date", t("fDateOpt"), "date");
   const reqExtra = A.req ? `<p class="note" style="text-align:start">${t("reqHint")}</p>` : "";
   const reqNote = A.req ? inp("reqnote", t("reqNote"), "text", 'maxlength="300"') : "";
   const head = A.req ? t(ev ? "reqEvent" : "reqMat") : t(ev ? "fhEvent" : "fhRes");
   return `<h2>${head}</h2>
-  <form id="adm-form" class="form">${reqExtra}<label>${t("fClubs")}</label><div class="checks">${boxes}</div>${ev ? "" : `<label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>`}${fields}${reqNote}
+  <form id="adm-form" class="form">${reqExtra}<label>${t("fClubs")}</label><div class="checks">${boxes}</div><label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>${fields}${reqNote}
     ${A.err ? `<div class="warn" role="alert">${esc(A.err)}</div>` : ""}
     <button class="btn" type="submit"${A.busy || A.uploading ? " disabled" : ""}>${A.busy ? t("saving") : t(A.req ? "reqSend" : "save")}</button>
     <button class="btn ghost" type="button" data-adm="cancel">${t("cancel")}</button></form>`;
@@ -881,7 +893,7 @@ function admContent() {
   const qzs = S.quizzes.filter((q) => canManage(q)).slice(0, 40);
   const legacy = isSuper() && (S.events.some((e) => !e.id) || S.resources.some((r) => !r.id && !r.native));
   const btn = (act, kind, id, label, cls) => `<button class="mini${cls ? " " + cls : ""}" data-adm="${act}" data-kind="${kind}" data-id="${esc(id)}">${label}</button>`;
-  const evRow = (e) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(e.title)}</b><span dir="auto">${esc([shortDate(e.date), e.time, clubsLabel(e)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("edit", "event", e.id, t("edit"))}${btn("del", "event", e.id, t("del"), "danger")}</div></div>`;
+  const evRow = (e) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(e.title)}</b><span dir="auto">${esc([shortDate(e.date), e.time, clubsLabel(e), gradesLabel(e)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("edit", "event", e.id, t("edit"))}${btn("del", "event", e.id, t("del"), "danger")}</div></div>`;
   const resRow = (r) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc([t(TYPE_KEY[r.type] || "refs"), clubsLabel(r), gradesLabel(r), shortDate(r.date)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("edit", "resource", r.id, t("edit"))}${btn("del", "resource", r.id, t("del"), "danger")}</div></div>`;
   const qzRow = (q) => `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(q.title)}</b><span dir="auto">${esc([`${q.count} ${t("questionsWord")}`, clubsLabel(q), gradesLabel(q)].filter(Boolean).join(" · "))}</span></div><div class="row-actions">${btn("qedit", "quiz", q.qid, t("edit"))}${btn("qres", "quiz", q.qid, t("results"))}${btn("del", "quiz", q.qid, t("del"), "danger")}</div></div>`;
   const shared = isSuper() ? "" : `<h2>${t("reqTitle")}</h2><p class="note" style="text-align:start;padding:0">${t("reqHint")}</p>
@@ -1146,10 +1158,10 @@ function previewBar() {
   return `<div class="warn" role="note">${t("previewBanner")}</div><div class="seg" role="group">${["home", "library", "events"].map((k) => `<button data-go="${k}" class="${cur === k ? "on" : ""}">${t(k)}</button>`).join("")}</div>`;
 }
 // The grade picker sits at the top of every club page; the choice is saved on the phone.
-const GRADE_TABS = ["home", "library", "references", "quizzes", "revision", "joint"];
+const GRADE_TABS = ["home", "library", "references", "quizzes", "revision", "joint", "events"];
 function gradeBar() {
   if (!GRADES.length || !GRADE_TABS.includes(S.tab)) return "";
-  const opts = [["all", t("gradeAll")], ...GRADES.map((g) => [g, gradeName(g)])];
+  const opts = GRADES.map((g) => [g, gradeName(g)]); // one tab per grade, no "all grades" tab
   return `<div class="seg grades" role="group" aria-label="${esc(t("gradeWord"))}">${opts.map(([k, l]) => `<button data-grade="${esc(k)}" class="${S.grade === k ? "on" : ""}" aria-pressed="${S.grade === k}">${esc(l)}</button>`).join("")}</div>`;
 }
 function navHtml() {
@@ -1169,6 +1181,7 @@ function render(keep) {
   if (keep && document.activeElement?.closest?.("[data-pw],[data-ar],[data-af],[data-aq],#f-user,#f-name,#f-pass,#f-msg")) return;
   const vis = visClubs();
   if (vis.length && !vis.some((c) => c.id === S.club)) { S.club = vis[0].id; store.set("club", S.club); }
+  if (GRADES.length && !GRADES.includes(S.grade)) S.grade = GRADES[0];
   if (gate()) S.tab = "account";
   else if (isAdmin()) {
     if (S.tab === "preview") { S.preview = true; S.tab = "home"; }
