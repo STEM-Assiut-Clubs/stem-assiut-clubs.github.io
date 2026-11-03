@@ -102,3 +102,6 @@ input[type=file]{font:inherit;padding:10px 0}
 
 .switch a.ext{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px;white-space:nowrap;height:44px;border-radius:999px;color:#4A4760;font-weight:600;font-size:14px;text-decoration:none;border:1px dashed #C9C5DA}
 .switch a.ext:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* grade picker */
+.seg.grades button{padding:0 4px;font-size:13px;min-width:0}
