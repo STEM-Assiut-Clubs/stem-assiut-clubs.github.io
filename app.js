@@ -1,5 +1,6 @@
 (() => {
 const CFG = window.APP_CONFIG;
+const MAX_MB = Number(CFG.MAX_UPLOAD_MB) || 25; // biggest file an admin can upload from the device
 const store = {
   get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch {} },
@@ -63,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: "Pick a file from your device (max 8 MB), or paste a link below", uploading: "Uploading…", uploaded: "Uploaded ✓", err_too_big: "File is too big (max 8 MB).", err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB), or paste a link below`, uploading: "Uploading…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -79,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: "اختار ملف من جهازك (حد أقصى 8 ميجا)، أو الصق لينك تحت", uploading: "جاري الرفع…", uploaded: "اترفع ✓", err_too_big: "الملف كبير (الحد الأقصى 8 ميجا).", err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)، أو الصق لينك تحت`, uploading: "جاري الرفع…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -731,7 +732,7 @@ async function admUpload(file) {
   if (!file || !A.form) return;
   const ext = (file.name.split(".").pop() || "").toLowerCase();
   if (!UPLOAD_EXTS.includes(ext)) { A.err = t("err_invalid_file") + " (" + UPLOAD_EXTS.join(", ") + ")"; A.upName = ""; render(true); return; }
-  if (file.size > 8 * 1024 * 1024) { A.err = t("err_too_big"); A.upName = ""; render(true); return; }
+  if (file.size > MAX_MB * 1024 * 1024) { A.err = t("err_too_big"); A.upName = ""; render(true); return; }
   A.err = ""; A.upName = ""; A.uploading = file.name; render(true);
   try {
     const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1] || ""); fr.onerror = () => rej(new Error("read")); fr.readAsDataURL(file); });
