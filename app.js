@@ -131,7 +131,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "2026.11.04-remove-biology";
+const VERSION = "final version";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -445,7 +445,7 @@ async function changePassword() {
 }
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">v${VERSION}</p>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
   const reg = S.acct.mode === "register";
   return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
@@ -454,7 +454,7 @@ function accountScreen() {
     <label for="f-pass">${t("password")}</label><input id="f-pass" name="password" type="password" autocomplete="${reg ? "new-password" : "current-password"}" minlength="6" required>
     ${S.acct.err ? `<div class="warn" role="alert">${esc(S.acct.err)}</div>` : ""}
     <button class="btn" type="submit">${reg ? t("createAccount") : t("signIn")}</button>
-  </form>${reg ? "" : `<p class="note">${t("forgotHint")}</p>`}<p class="note">${t("accountNote")}</p><p class="note" dir="ltr" style="opacity:.6">v${VERSION}</p>`;
+  </form>${reg ? "" : `<p class="note">${t("forgotHint")}</p>`}<p class="note">${t("accountNote")}</p><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
 }
 
 // Opens Google Drive / Docs / YouTube links inside the app instead of leaving it
