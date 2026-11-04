@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 4";
+const VERSION = "final version 5";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -743,19 +743,15 @@ function paintProg() {
   const pct = Math.max(0, Math.min(100, Math.round(p.pct)));
   document.getElementById("up-fill").style.width = pct + "%";
   document.getElementById("up-pct").textContent = p.phase === "done" ? "100%" : p.phase === "save" ? "" : pct + "%";
-  document.getElementById("up-sub").textContent = p.phase === "read" ? t("upPrep") : p.phase === "save" ? t("upSaving") : p.phase === "done" ? t("uploaded") : fmtMb(p.size * pct / 100) + " / " + fmtMb(p.size);
+  document.getElementById("up-sub").textContent = p.phase === "read" ? t("upPrep") : p.phase === "save" ? t("upSaving") : p.phase === "done" ? t("uploaded") : fmtMb(p.size);
 }
 function setProg(patch) { const A = S.adm; if (!A.prog) return; Object.assign(A.prog, patch); paintProg(); }
-function apiUpload(payload, onPct, onSent) {
-  return new Promise((res, rej) => {
-    const x = new XMLHttpRequest();
-    x.open("POST", CFG.API_URL); x.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
-    x.upload.onprogress = (e) => { if (e.lengthComputable) onPct(e.loaded / e.total); };
-    x.upload.onload = () => onSent();
-    x.onload = () => { try { res(JSON.parse(x.responseText)); } catch { rej(new Error("bad")); } };
-    x.onerror = () => rej(new Error("net")); x.ontimeout = x.onerror;
-    x.send(JSON.stringify(payload));
-  });
+// A browser can only report real upload bytes with XHR upload listeners, but those force a CORS preflight that Apps Script
+// rejects. So the request is a plain fetch and the percentage is an estimate that eases toward 95% until the server answers.
+async function apiUpload(payload, onPct) {
+  const t0 = Date.now(), tau = Math.max(3, (String(payload.data || "").length / 1048576) * 1.3) * 1000;
+  const timer = setInterval(() => onPct(0.95 * (1 - Math.exp(-(Date.now() - t0) / tau))), 200);
+  try { return await api(payload.action, payload); } finally { clearInterval(timer); }
 }
 async function admUpload(file) {
   const A = S.adm;
@@ -768,7 +764,7 @@ async function admUpload(file) {
     const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1] || ""); fr.onerror = () => rej(new Error("read")); fr.readAsDataURL(file); });
     setProg({ phase: "send", pct: 0 });
     const r = await apiUpload({ action: "adminUpload", token: S.user.token, name: file.name, data, club: upClub() },
-      (f) => setProg({ phase: "send", pct: f * 100 }), () => setProg({ phase: "save", pct: 100 }));
+      (f) => setProg({ phase: "send", pct: f * 100 }));
     if (r.ok) { A.form.url = r.url; A.prog = { name: file.name, size: file.size, pct: 100, phase: "done" }; if (!A.form.title) A.form.title = r.name.replace(/\.[^.]+$/, ""); toast(t("uploaded"), 2000); }
     else if (r.error === "auth") { signOut(); return; }
     else { A.prog = null; A.err = admErr(r) + (r.detail ? " (" + r.detail + ")" : ""); }
