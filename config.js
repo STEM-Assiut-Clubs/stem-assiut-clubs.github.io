@@ -26,10 +26,5 @@ window.APP_CONFIG = {
     { id: "mechanics", color: "#0F766E", tint: "#E3F5F3", logo: "icons/mechanics_logo.png" },
     { id: "capstone",  color: "#BE185D", tint: "#FCE9F1", logo: "icons/capstone_logo.png" },
     { id: "math",      color: "#15803D", tint: "#E6F5EB", logo: "icons/math_logo.png" },
-    // الأحياء ليه موقع خاص بيه: لما الطالب يدوس عليه بيفتح الموقع ده بدل صفحة جوه التطبيق.
-    // حط لينك الموقع في url (لازم يبدأ بـ https://). لحد ما تحطه الزرار بيفضل مخفي.
-    // Biology has its own website: tapping it opens that site instead of a page inside the app.
-    // Put the website address in url (must start with https://). The button stays hidden until you do.
-    { id: "biology",   external: true, url: "https://biologyteam.github.io/SABC/" },
   ],
 };
