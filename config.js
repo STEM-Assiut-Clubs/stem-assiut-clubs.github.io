@@ -11,7 +11,7 @@ window.APP_CONFIG = {
   // true = لسه بيقرا الشيتات القديمة جنب المحتوى اللي من التطبيق (من غير تكرار). بعد ما تشغّل importLegacy خليها false.
   // true = also read the old published sheets next to the in-app content. Set false after running importLegacy.
   LEGACY_CSV: true,
-  LOGOS: { chemistry: "icons/chemistry_logo.png", physics: "icons/physics_logo.png" },
+  LOGOS: { chemistry: "icons/chemistry_logo.png", physics: "icons/physics_logo.png", deutsch: "icons/deutsch_logo.png" },
   // قائمة النوادي / Clubs list. لإضافة نادي جديد: أضف سطر هنا + اسمه في T جوه app.js + اكتب id في عمود club في الشيت.
   // To add a club: add a line here, its name in T (app.js), and use the id in the sheet's "club" column.
   // "joint" القديمة في الشيت = النوادي دي بس / legacy "joint" rows in the sheet mean only these clubs
@@ -28,7 +28,7 @@ window.APP_CONFIG = {
   CLUBS: [
     { id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC", logo: "icons/chemistry_logo.png" },
     { id: "physics",   color: "#1F5FD1", tint: "#E8F0FD", logo: "icons/physics_logo.png" },
-    { id: "deutsch",   color: "#B45309", tint: "#FDF1E3", glyph: "DE" },
+    { id: "deutsch",   color: "#B45309", tint: "#FDF1E3", logo: "icons/deutsch_logo.png" },
     { id: "mechanics", color: "#0F766E", tint: "#E3F5F3", logo: "icons/mechanics_logo.png" },
     { id: "capstone",  color: "#BE185D", tint: "#FCE9F1", logo: "icons/capstone_logo.png" },
     { id: "math",      color: "#15803D", tint: "#E6F5EB", logo: "icons/math_logo.png" },

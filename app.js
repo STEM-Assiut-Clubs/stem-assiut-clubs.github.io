@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 7";
+const VERSION = "final version 8";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -1208,7 +1208,7 @@ function welcomeHtml(vis) {
     <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div></div>`;
 }
 function navHtml() {
-  if (gate() || S.tab === "welcome") return "";
+  if (gate() || (S.tab === "welcome" && !isAdmin())) return "";
   // while a quiz is being taken there is no way out except the confirmed "leave" button
   if (S.tab === "quiz" && S.qz && ["ready", "submitting"].includes(S.qz.state) && !isAdmin()) return "";
   const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
@@ -1227,7 +1227,7 @@ function render(keep) {
   if (GRADES.length && !GRADES.includes(S.grade)) S.grade = GRADES[0];
   if (gate()) S.tab = "account";
   else if (isAdmin()) {
-    if (S.tab === "preview") { S.preview = true; S.tab = "home"; }
+    if (S.tab === "preview") { S.preview = true; S.tab = "welcome"; }
     else if (S.tab === "admin") S.preview = false;
     if (!S.preview && !["admin", "account"].includes(S.tab)) S.tab = "admin";
   }
@@ -1239,16 +1239,15 @@ function render(keep) {
   document.querySelector('meta[name="theme-color"]').content = clubColor(S.club);
   if (S.tab === "welcome") {
     document.querySelector('meta[name="theme-color"]').content = "#0B1026";
-    document.getElementById("app").innerHTML = welcomeHtml(vis);
+    document.getElementById("app").innerHTML = welcomeHtml(vis) + (isAdmin() ? navHtml() : "");
     return;
   }
   const screens = { home, library, events: eventsScreen, quizzes: quizzesScreen, revision: revisionScreen, references: referencesScreen, joint: jointScreen, support: supportScreen, admin: adminScreen, quiz: quizScreen, account: accountScreen };
   const titles = { home: t(S.club), library: t("library"), references: t("refsTitle"), events: t("events"), quizzes: t("quizzes"), revision: t("revisionTitle"), joint: t("jointSpace"), support: t("support"), admin: t("admin"), quiz: t("quizzes"), account: t("account") };
   const subs = { home: t("app"), library: t("losSub"), references: t("refsPageSub"), events: t("upcoming"), quizzes: t("quizzesSub"), revision: t("revisionSub"), joint: t("jointSub"), support: t("supportSub"), admin: t("adminSub"), quiz: "", account: t("accountSub") };
-  const showSwitch = !["joint", "account", "support", "admin", "quiz"].includes(S.tab);
   const logo = ["joint", "account", "support", "admin", "quiz"].includes(S.tab) ? "" : (ci.logo || CFG.LOGOS?.[S.club]) ? `<img src="${esc(ci.logo || CFG.LOGOS[S.club])}" alt="">` : `<div class="glyph" aria-hidden="true" style="background:${ci.color}">${esc(ci.glyph || t(S.club).slice(0, 2))}</div>`;
   const back = CHILD.includes(S.tab) ? `<button class="icon-btn" data-go="home" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
-    : !isAdmin() && ["home", "library", "events"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
+    : ["home", "library", "events"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
   const app = document.getElementById("app");
   const fu = document.getElementById("f-user"), fn = document.getElementById("f-name");
   if (fu) S.form.username = fu.value;
@@ -1259,7 +1258,7 @@ function render(keep) {
   const keepFocusQ = document.activeElement?.id === "q";
   app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
     <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="icon-btn" data-act="lang">${t("lang")}</button></div>
-    ${showSwitch && vis.length + LINK_CLUBS.length > 1 ? `<div class="switch" role="group">${vis.map((c) => `<button data-club="${c.id}" class="${S.club === c.id ? "on" : ""}" aria-pressed="${S.club === c.id}"${S.club === c.id ? ` style="background:${c.color}"` : ""}>${t(c.id)}</button>`).join("")}${LINK_CLUBS.map((c) => `<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(t(c.id) + " (" + t("extSite") + ")")}">${t(c.id)} <span aria-hidden="true">↗</span></a>`).join("")}</div>` : ""}</header>
+  </header>
   <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${gradeBar()}${screens[S.tab]()}</main>
   ${navHtml()}`;
   if (prev) document.querySelector("main").scrollTop = prev;
