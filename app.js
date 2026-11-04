@@ -64,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: `Pick a file from your device (max ${MAX_MB} MB), or paste a link below`, uploading: "Uploading…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB), or paste a link below`, uploading: "Uploading…", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -80,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)، أو الصق لينك تحت`, uploading: "جاري الرفع…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)، أو الصق لينك تحت`, uploading: "جاري الرفع…", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "Final Version";
+const VERSION = "final version 4";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -162,7 +162,7 @@ const visibleIds = () => {
 const visClubs = () => CLUB_LIST.filter((c) => visibleIds().includes(c.id));
 const gate = () => (!CFG.API_URL ? "" : !S.user ? "login" : S.user.temp ? "password" : "");
 const seesItem = (x) => !CFG.API_URL || S.user?.role?.super || x.clubs.includes("*") || x.clubs.some((c) => visibleIds().includes(c));
-const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", upName: "", reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
+const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", prog: null, reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
 S.adm = newAdm();
 S.pw = { old: "", new: "", err: "", busy: false };
 S.preview = false;
@@ -255,10 +255,11 @@ function parseGrades(str) {
   }
   return out.size ? [...out] : ["*"];
 }
-const gradesToForm = (g) => (!g || g.includes("*") ? ["all"] : [...g]);
-const gradeStr = (f) => (!f.grades?.length || f.grades.includes("all") ? "all" : f.grades.join("+"));
+const allGrades = (g) => !!GRADES.length && GRADES.every((x) => g.includes(x));
+const gradesToForm = (g) => (!g || g.includes("*") || allGrades(g) ? ["all"] : [...g]);
+const gradeStr = (f) => (!f.grades?.length || f.grades.includes("all") || allGrades(f.grades) ? "all" : f.grades.join("+"));
 const gradeName = (g) => `${t("gradeWord")} ${new Intl.NumberFormat(locale()).format(+g)}`;
-const gradesLabel = (x) => (!x.grades || x.grades.includes("*") ? "" : x.grades.map(gradeName).join(" + "));
+const gradesLabel = (x) => (!x.grades || x.grades.includes("*") || allGrades(x.grades) ? "" : x.grades.map(gradeName).join(" + "));
 // الطالب شايف اللي ليه: المحتوى من غير جريد بيظهر لكل الجرايد / content with no grade shows for every grade
 // An item shared by several grades (or with no grade) is simply listed again inside each grade tab, never in a tab of its own.
 const inGrade = (x) => !GRADES.length || !x.grades || x.grades.includes("*") || x.grades.includes(S.grade);
@@ -648,7 +649,7 @@ async function refreshMe() {
 
 function admOpen(kind, it, req) {
   const A = S.adm, mine = myClubs();
-  A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.upName = ""; A.editId = it ? it.id : "";
+  A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.prog = null; A.editId = it ? it.id : "";
   const def = mine.includes(S.club) ? [S.club] : mine.slice(0, 1);
   A.form = it
     ? { clubs: it.clubs[0] === "*" ? ["all"] : [...it.clubs], title: it.title || "", date: it.ds || "", time: it.time || "", place: it.place || "", note: it.note || "", type: it.type || "file", description: it.desc || "", url: it.url || "", lo: it.lo || "", grades: gradesToForm(it.grades), reqnote: "" }
@@ -727,22 +728,52 @@ async function admDelete(kind, id) {
 // The file picker has no "accept" filter on purpose: a filter that lists images makes many Android phones open the
 // photo picker (photos only) instead of the Files picker. The file type is checked here after the file is chosen.
 const UPLOAD_EXTS = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "png", "jpg", "jpeg", "txt", "mp4"];
+const upClub = () => { const A = S.adm; const cs = A.form?.clubs || []; return cs.find((c) => myClubs().includes(c)) || cs.find((c) => c !== "all") || ""; };
+const fmtMb = (n) => (n / 1048576).toFixed(n < 10485760 ? 1 : 0) + " MB";
+function progressHtml() {
+  const p = S.adm.prog; if (!p) return "";
+  const col = clubColor(upClub());
+  return `<div class="up ${p.phase}" id="up-card" style="--up:${col}" role="status" aria-live="polite"><div class="up-top"><span class="up-name">${p.phase === "done" ? "✓ " : "📎 "}${esc(p.name)}</span><b class="up-pct" id="up-pct"></b></div><div class="up-track"><i class="up-fill" id="up-fill"></i></div><small class="up-sub" id="up-sub"></small></div>`;
+}
+// updates the bar in place (no full re-render, so typing in the form is never interrupted)
+function paintProg() {
+  const p = S.adm?.prog, card = document.getElementById("up-card"); if (!p || !card) return;
+  card.style.setProperty("--up", clubColor(upClub()));
+  card.className = "up " + p.phase;
+  const pct = Math.max(0, Math.min(100, Math.round(p.pct)));
+  document.getElementById("up-fill").style.width = pct + "%";
+  document.getElementById("up-pct").textContent = p.phase === "done" ? "100%" : p.phase === "save" ? "" : pct + "%";
+  document.getElementById("up-sub").textContent = p.phase === "read" ? t("upPrep") : p.phase === "save" ? t("upSaving") : p.phase === "done" ? t("uploaded") : fmtMb(p.size * pct / 100) + " / " + fmtMb(p.size);
+}
+function setProg(patch) { const A = S.adm; if (!A.prog) return; Object.assign(A.prog, patch); paintProg(); }
+function apiUpload(payload, onPct, onSent) {
+  return new Promise((res, rej) => {
+    const x = new XMLHttpRequest();
+    x.open("POST", CFG.API_URL); x.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
+    x.upload.onprogress = (e) => { if (e.lengthComputable) onPct(e.loaded / e.total); };
+    x.upload.onload = () => onSent();
+    x.onload = () => { try { res(JSON.parse(x.responseText)); } catch { rej(new Error("bad")); } };
+    x.onerror = () => rej(new Error("net")); x.ontimeout = x.onerror;
+    x.send(JSON.stringify(payload));
+  });
+}
 async function admUpload(file) {
   const A = S.adm;
   if (!file || !A.form) return;
   const ext = (file.name.split(".").pop() || "").toLowerCase();
-  if (!UPLOAD_EXTS.includes(ext)) { A.err = t("err_invalid_file") + " (" + UPLOAD_EXTS.join(", ") + ")"; A.upName = ""; render(true); return; }
-  if (file.size > MAX_MB * 1024 * 1024) { A.err = t("err_too_big"); A.upName = ""; render(true); return; }
-  A.err = ""; A.upName = ""; A.uploading = file.name; render(true);
+  if (!UPLOAD_EXTS.includes(ext)) { A.err = t("err_invalid_file") + " (" + UPLOAD_EXTS.join(", ") + ")"; A.prog = null; render(true); return; }
+  if (file.size > MAX_MB * 1024 * 1024) { A.err = t("err_too_big"); A.prog = null; render(true); return; }
+  A.err = ""; A.uploading = file.name; A.prog = { name: file.name, size: file.size, pct: 0, phase: "read" }; render(true); paintProg();
   try {
     const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1] || ""); fr.onerror = () => rej(new Error("read")); fr.readAsDataURL(file); });
-    const club = A.form.clubs.find((c) => myClubs().includes(c)) || A.form.clubs[0] || "";
-    const r = await api("adminUpload", { token: S.user.token, name: file.name, data, club });
-    if (r.ok) { A.form.url = r.url; A.upName = file.name; if (!A.form.title) A.form.title = r.name.replace(/\.[^.]+$/, ""); toast(t("uploaded"), 2000); }
+    setProg({ phase: "send", pct: 0 });
+    const r = await apiUpload({ action: "adminUpload", token: S.user.token, name: file.name, data, club: upClub() },
+      (f) => setProg({ phase: "send", pct: f * 100 }), () => setProg({ phase: "save", pct: 100 }));
+    if (r.ok) { A.form.url = r.url; A.prog = { name: file.name, size: file.size, pct: 100, phase: "done" }; if (!A.form.title) A.form.title = r.name.replace(/\.[^.]+$/, ""); toast(t("uploaded"), 2000); }
     else if (r.error === "auth") { signOut(); return; }
-    else A.err = admErr(r) + (r.detail ? " (" + r.detail + ")" : ""); // admins see the real reason from the server
-  } catch { A.err = t("err_generic"); }
-  A.uploading = ""; render(true);
+    else { A.prog = null; A.err = admErr(r) + (r.detail ? " (" + r.detail + ")" : ""); }
+  } catch { A.prog = null; A.err = t("err_generic"); }
+  A.uploading = ""; render(true); paintProg();
 }
 async function admDecide(id, ok) {
   try {
@@ -839,7 +870,7 @@ function adminForm() {
       + inp("title", t("fTitle"), "text", 'required maxlength="120"')
       + `<label>${t("uploadFile")}</label><input id="af-file" class="vh" type="file" data-af-file><label class="btn ghost filebtn" for="af-file">📎 ${t("chooseFile")}</label>`
       + `<p class="note" style="text-align:start;padding:0">${t("fileTypesHint")}</p>`
-      + (A.uploading ? `<p class="note" style="text-align:start" role="status">${t("uploading")} ${esc(A.uploading)}</p>` : A.upName ? `<p class="note" style="text-align:start" role="status">✓ ${esc(A.upName)}</p>` : "")
+      + progressHtml()
       + inp("url", t("fUrl"), "url", 'required dir="ltr" placeholder="https://"')
       + inp("description", t("fDesc"), "text", 'maxlength="300"') + inp("lo", t("fLo"), "text", 'maxlength="80"') + inp("date", t("fDateOpt"), "date");
   const reqExtra = A.req ? `<p class="note" style="text-align:start">${t("reqHint")}</p>` : "";
@@ -1135,10 +1166,14 @@ document.addEventListener("change", (e) => {
     const c = d.afc, cur = A.form.clubs;
     if (el.checked) { A.form.clubs = c === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), c]; if (c === "all" || cur.includes("all")) render(true); }
     else A.form.clubs = cur.filter((x) => x !== c);
+    paintProg();
   } else if (d.afg && A.form) {
     const g = d.afg, cur = A.form.grades || [];
-    if (el.checked) { A.form.grades = g === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), g]; if (g === "all" || cur.includes("all")) render(true); }
-    else A.form.grades = cur.filter((x) => x !== g);
+    if (el.checked) {
+      const next = g === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), g];
+      A.form.grades = allGrades(next) ? ["all"] : next; // every grade ticked = "All grades"
+      if (g === "all" || cur.includes("all") || A.form.grades[0] === "all") render(true);
+    } else A.form.grades = cur.filter((x) => x !== g);
   } else if (d.af === "type" && A.form) { A.form.type = el.value; render(true); }
   else if (el.hasAttribute?.("data-af-file")) admUpload(el.files && el.files[0]);
   else if (d.arc && A.roleEdit) {
@@ -1218,6 +1253,7 @@ function render(keep) {
   if (prev) document.querySelector("main").scrollTop = prev;
   document.querySelector(".switch button.on")?.scrollIntoView({ inline: "center", block: "nearest" });
   if (keepFocusQ) { const q = document.getElementById("q"); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  paintProg();
 }
 
 document.addEventListener("click", (e) => {
