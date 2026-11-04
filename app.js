@@ -64,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: `Pick a file from your device (max ${MAX_MB} MB), or paste a link below`, uploading: "Uploading…", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -80,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)، أو الصق لينك تحت`, uploading: "جاري الرفع…", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 5";
+const VERSION = "final version 7";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -142,7 +142,7 @@ const RETIRED_GRADES = (CFG.RETIRED_GRADES || []).map(String); // still understo
 const S = {
   club: clubInfo(store.get("club", "")) ? store.get("club", "") : CLUB_LIST[0].id,
   grade: GRADES.includes(store.get("grade", "")) ? store.get("grade", "") : GRADES[0], // one of the grade tabs; there is no "all grades" tab
-  tab: "home", filter: "all", q: "", open: {},
+  tab: "welcome", filter: "all", q: "", open: {},
   lang: store.get("lang", (navigator.language || "en").startsWith("ar") ? "ar" : "en"),
   resources: [], events: [], quizzes: [], qz: null, live: true,
   user: (() => { try { return JSON.parse(store.get("acct", "")) || null; } catch { return null; } })(),
@@ -350,7 +350,7 @@ async function submitAccount(form) {
   btn.disabled = true; btn.textContent = t("pleaseWait");
   try {
     const r = await api(reg ? "register" : "login", { username: v.username, name: v.name, password: v.password });
-    if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null, temp: !!r.mustChange }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "home"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
+    if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null, temp: !!r.mustChange }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "welcome"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
     S.acct.err = T[S.lang]["err_" + r.error] || t("err_generic");
   } catch { S.acct.err = t("err_generic"); }
   render();
@@ -438,7 +438,7 @@ async function changePassword() {
     if (r.ok) {
       S.pw = { old: "", new: "", err: "", busy: false };
       setUser({ ...S.user, temp: false }); toast(t("pwChanged"), 2500);
-      if (forced) { S.tab = isAdmin() ? "admin" : "home"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); } else render(true);
+      if (forced) { S.tab = isAdmin() ? "admin" : "welcome"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); } else render(true);
       return;
     }
     if (r.error === "auth") { signOut(); return; }
@@ -676,6 +676,7 @@ async function admSave() {
   if (!f || A.busy) return;
   A.err = "";
   if (!f.clubs.length) { A.err = t("err_invalid_club"); render(true); return; }
+  if (A.kind !== "event" && !f.url) { A.err = t("err_no_file"); render(true); return; }
   const club = f.clubs.join("+");
   const item = A.kind === "event"
     ? { club, title: f.title, date: f.date, time: f.time, place: f.place, note: f.note, grade: gradeStr(f) }
@@ -867,7 +868,6 @@ function adminForm() {
       + `<label>${t("uploadFile")}</label><input id="af-file" class="vh" type="file" data-af-file><label class="btn ghost filebtn" for="af-file">📎 ${t("chooseFile")}</label>`
       + `<p class="note" style="text-align:start;padding:0">${t("fileTypesHint")}</p>`
       + progressHtml()
-      + inp("url", t("fUrl"), "url", 'required dir="ltr" placeholder="https://"')
       + inp("description", t("fDesc"), "text", 'maxlength="300"') + inp("lo", t("fLo"), "text", 'maxlength="80"') + inp("date", t("fDateOpt"), "date");
   const reqExtra = A.req ? `<p class="note" style="text-align:start">${t("reqHint")}</p>` : "";
   const reqNote = A.req ? inp("reqnote", t("reqNote"), "text", 'maxlength="300"') : "";
@@ -1197,8 +1197,18 @@ function gradeBar() {
   const opts = GRADES.map((g) => [g, gradeName(g)]); // one tab per grade, no "all grades" tab
   return `<div class="seg grades" role="group" aria-label="${esc(t("gradeWord"))}">${opts.map(([k, l]) => `<button data-grade="${esc(k)}" class="${S.grade === k ? "on" : ""}" aria-pressed="${S.grade === k}">${esc(l)}</button>`).join("")}</div>`;
 }
+function welcomeHtml(vis) {
+  const glyph = (c) => (c.logo || CFG.LOGOS?.[c.id]) ? `<img src="${esc(c.logo || CFG.LOGOS[c.id])}" alt="">` : `<span class="wg" style="background:${c.color}">${esc(c.glyph || t(c.id).slice(0, 2))}</span>`;
+  const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
+  const ext = (c) => `<a class="wc" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></a>`;
+  const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
+  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="wbtn" data-act="lang">${t("lang")}</button></span></div>
+    <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
+    <p class="wel-pick">${t("welcomePick")}</p>
+    <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div></div>`;
+}
 function navHtml() {
-  if (gate()) return "";
+  if (gate() || S.tab === "welcome") return "";
   // while a quiz is being taken there is no way out except the confirmed "leave" button
   if (S.tab === "quiz" && S.qz && ["ready", "submitting"].includes(S.qz.state) && !isAdmin()) return "";
   const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
@@ -1227,12 +1237,18 @@ function render(keep) {
   root.style.setProperty("--accent", ci.color); root.style.setProperty("--tint", ci.tint || "#F1EBFC");
   root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
   document.querySelector('meta[name="theme-color"]').content = clubColor(S.club);
+  if (S.tab === "welcome") {
+    document.querySelector('meta[name="theme-color"]').content = "#0B1026";
+    document.getElementById("app").innerHTML = welcomeHtml(vis);
+    return;
+  }
   const screens = { home, library, events: eventsScreen, quizzes: quizzesScreen, revision: revisionScreen, references: referencesScreen, joint: jointScreen, support: supportScreen, admin: adminScreen, quiz: quizScreen, account: accountScreen };
   const titles = { home: t(S.club), library: t("library"), references: t("refsTitle"), events: t("events"), quizzes: t("quizzes"), revision: t("revisionTitle"), joint: t("jointSpace"), support: t("support"), admin: t("admin"), quiz: t("quizzes"), account: t("account") };
   const subs = { home: t("app"), library: t("losSub"), references: t("refsPageSub"), events: t("upcoming"), quizzes: t("quizzesSub"), revision: t("revisionSub"), joint: t("jointSub"), support: t("supportSub"), admin: t("adminSub"), quiz: "", account: t("accountSub") };
   const showSwitch = !["joint", "account", "support", "admin", "quiz"].includes(S.tab);
   const logo = ["joint", "account", "support", "admin", "quiz"].includes(S.tab) ? "" : (ci.logo || CFG.LOGOS?.[S.club]) ? `<img src="${esc(ci.logo || CFG.LOGOS[S.club])}" alt="">` : `<div class="glyph" aria-hidden="true" style="background:${ci.color}">${esc(ci.glyph || t(S.club).slice(0, 2))}</div>`;
-  const back = CHILD.includes(S.tab) ? `<button class="icon-btn" data-go="home" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
+  const back = CHILD.includes(S.tab) ? `<button class="icon-btn" data-go="home" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
+    : !isAdmin() && ["home", "library", "events"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
   const app = document.getElementById("app");
   const fu = document.getElementById("f-user"), fn = document.getElementById("f-name");
   if (fu) S.form.username = fu.value;
@@ -1261,7 +1277,7 @@ document.addEventListener("click", (e) => {
   if (el.dataset.lo) { S.open[el.dataset.lo] = el.dataset.open !== "1"; render(true); return; }
   if (el.dataset.acctMode) { S.acct.mode = el.dataset.acctMode; S.acct.err = ""; render(); return; }
   if (el.dataset.act === "signout") { signOut(); return; }
-  if (el.dataset.club) { S.club = el.dataset.club; store.set("club", S.club); }
+  if (el.dataset.club) { S.club = el.dataset.club; store.set("club", S.club); if (el.dataset.go) { S.tab = el.dataset.go; S.filter = "all"; S.q = ""; } } // a club card on the welcome page also opens that club
   else if (el.dataset.grade) { S.grade = el.dataset.grade; store.set("grade", S.grade); }
   else if (el.dataset.filterSet) S.filter = el.dataset.filterSet;
   else if (el.dataset.go) { S.supOk = false; S.supErr = ""; S.tab = el.dataset.go; S.filter = el.dataset.filter || "all"; S.q = ""; }

@@ -124,3 +124,26 @@ input[type=file]{font:inherit;padding:10px 0}
 .up-sub{color:var(--muted,#667);font-size:12px}
 @keyframes upshine{to{transform:translateX(100%)}}
 @media (prefers-reduced-motion:reduce){.up-fill,.up-fill::after{animation:none!important;transition:none}}
+
+/* welcome page: its own colours (midnight + gold), different from every club */
+.wel{flex:1;overflow-y:auto;padding:calc(18px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));color:#fff;background:radial-gradient(120% 60% at 90% -10%,rgba(245,179,1,.28),transparent 60%),linear-gradient(165deg,#0B1026 0%,#1A1556 55%,#2B1B6B 100%);display:flex;flex-direction:column;gap:14px}
+.wel>*{flex-shrink:0}
+.wel-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wel-brand{font-family:'Sora',sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#F5B301}
+:root[dir="rtl"] .wel-brand{letter-spacing:0}
+.wbtn{min-width:44px;height:44px;margin-inline-start:6px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;font-weight:600;font-size:14px}
+.wel-hero{padding:22px 0 6px}
+.wel-hero h1{margin:0;font-family:'Sora','Cairo',sans-serif;font-size:32px;line-height:1.2}
+.wel-hero p{margin:8px 0 0;color:rgba(255,255,255,.75);font-size:16px}
+.wel-hero::after{content:"";display:block;width:56px;height:4px;border-radius:4px;background:#F5B301;margin-top:16px}
+.wel-pick{margin:6px 0 0;color:rgba(255,255,255,.85);font-size:14px}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.wc{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:16px;min-height:132px;border:0;border-radius:20px;background:#fff;color:#1E1B2E;text-align:start;text-decoration:none;font:inherit;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.28);transition:transform .15s}
+.wc::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:6px;background:var(--c)}
+.wc:active{transform:scale(.97)}
+.wc:focus-visible{outline:3px solid #F5B301;outline-offset:2px}
+.wc img,.wc .wg{width:52px;height:52px;border-radius:14px;object-fit:cover;background:var(--ct)}
+.wc .wg{display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Sora',sans-serif;font-weight:700;font-size:18px}
+.wc b{font-size:16px;margin-top:4px}
+.wc small{color:var(--c);font-weight:600;font-size:12px}
+@media (max-width:340px){.wgrid{grid-template-columns:1fr}}
