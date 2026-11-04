@@ -18,7 +18,10 @@ window.APP_CONFIG = {
   JOINT_CLUBS: ["chemistry", "physics"],
   // الجرايد اللي الطالب بيختار منها جوه تاب المادة. لازم عمود grade في الشيتات يحتوي واحد منهم (أو 10+11 أو all).
   // Grades the student picks from inside a club tab. The "grade" column holds one of these (or 10+11, or all).
-  GRADES: ["10", "11", "12"],
+  GRADES: ["10", "11"],
+  // جرايد اتشالت من التطبيق: مفيش لها تاب، والمحتوى اللي متسجل لها بس (مثلًا 12) بيفضل مخفي مش بيظهر في جرايد تانية.
+  // Grades that were removed: no tab, and content tagged only with them (for example 12) stays hidden instead of showing in other grades.
+  RETIRED_GRADES: ["12"],
   CLUBS: [
     { id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC", logo: "icons/chemistry_logo.png" },
     { id: "physics",   color: "#1F5FD1", tint: "#E8F0FD", logo: "icons/physics_logo.png" },

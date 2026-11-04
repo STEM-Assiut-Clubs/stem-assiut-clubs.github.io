@@ -131,12 +131,13 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version";
+const VERSION = "final version 2";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
 const clubInfo = (id) => CLUB_LIST.find((c) => c.id === id);
-const GRADES = (CFG.GRADES || ["10", "11", "12"]).map(String);
+const GRADES = (CFG.GRADES || ["10", "11"]).map(String);
+const RETIRED_GRADES = (CFG.RETIRED_GRADES || []).map(String); // still understood in the sheets, but they have no tab
 const S = {
   club: clubInfo(store.get("club", "")) ? store.get("club", "") : CLUB_LIST[0].id,
   grade: GRADES.includes(store.get("grade", "")) ? store.get("grade", "") : GRADES[0], // one of the grade tabs; there is no "all grades" tab
@@ -249,7 +250,7 @@ function parseGrades(str) {
     const p = raw.trim().toLowerCase().replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/^(grade|جريد|g)/, "");
     if (!p) continue;
     if (p === "all" || p === "everyone" || p === "الكل") return ["*"];
-    if (GRADES.includes(p)) out.add(p);
+    if (GRADES.includes(p) || RETIRED_GRADES.includes(p)) out.add(p);
   }
   return out.size ? [...out] : ["*"];
 }
