@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 8";
+const VERSION = "final version 9";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -1202,7 +1202,7 @@ function welcomeHtml(vis) {
   const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
   const ext = (c) => `<a class="wc" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></a>`;
   const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
-  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="wbtn" data-act="lang">${t("lang")}</button></span></div>
+  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span>${CFG.API_URL ? `<button class="wbtn" data-go="account" aria-label="${t("account")}" title="${t("account")}">${icon("user")}</button>` : ""}<button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="wbtn" data-act="lang">${t("lang")}</button></span></div>
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
     <p class="wel-pick">${t("welcomePick")}</p>
     <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div></div>`;
