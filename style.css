@@ -147,3 +147,4 @@ input[type=file]{font:inherit;padding:10px 0}
 .wc b{font-size:16px;margin-top:4px}
 .wc small{color:var(--c);font-weight:600;font-size:12px}
 @media (max-width:340px){.wgrid{grid-template-columns:1fr}}
+.wbtn{position:relative}.wdot{position:absolute;top:8px;inset-inline-end:8px;width:10px;height:10px;border-radius:50%;background:#E5484D;border:2px solid #1A1556}

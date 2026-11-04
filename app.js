@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 9";
+const VERSION = "final version 10";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -1202,7 +1202,7 @@ function welcomeHtml(vis) {
   const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
   const ext = (c) => `<a class="wc" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></a>`;
   const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
-  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span>${CFG.API_URL ? `<button class="wbtn" data-go="account" aria-label="${t("account")}" title="${t("account")}">${icon("user")}</button>` : ""}<button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="wbtn" data-act="lang">${t("lang")}</button></span></div>
+  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span>${CFG.API_URL ? `<button class="wbtn" data-go="support" aria-label="${t("support")}" title="${t("support")}">${icon("support")}${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button><button class="wbtn" data-go="account" aria-label="${t("account")}" title="${t("account")}">${icon("user")}</button>` : ""}<button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="wbtn" data-act="lang">${t("lang")}</button></span></div>
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
     <p class="wel-pick">${t("welcomePick")}</p>
     <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div></div>`;
@@ -1213,7 +1213,7 @@ function navHtml() {
   if (S.tab === "quiz" && S.qz && ["ready", "submitting"].includes(S.qz.state) && !isAdmin()) return "";
   const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
   const on = (k) => (isAdmin() ? (k === "preview" ? inPreview : S.tab === k) : S.tab === k || (k === "home" && CHILD.includes(S.tab)));
-  const items = isAdmin() ? [["admin", "settings"], ["preview", "eye"], ["account", "user"]] : [["home", "home"], ["library", "book"], ["events", "cal"], ...(CFG.API_URL ? [["support", "support"], ["account", "user"]] : [])];
+  const items = isAdmin() ? [["admin", "settings"], ["preview", "eye"], ["account", "user"]] : [["home", "home"], ["library", "book"], ["events", "cal"]];
   const dot = (on) => (on ? `<i aria-label="new" style="position:absolute;top:10px;inset-inline-start:calc(50% + 6px);width:10px;height:10px;border-radius:50%;background:#E5484D;border:2px solid #fff"></i>` : "");
   return `<nav>${items.map(([k, ic]) => `<button data-go="${k}" class="${on(k) ? "on" : ""}"${on(k) ? ' aria-current="page"' : ""}${k === "support" || k === "admin" ? ' style="position:relative"' : ""}>${icon(ic)}<span>${t(k)}</span>${dot(k === "support" && S.user && answeredCount() > Number(store.get("supSeen", "0")) && S.tab !== "support")}${dot(k === "admin" && unansweredAdm() > 0 && S.tab !== "admin")}</button>`).join("")}</nav>`;
 }
@@ -1247,6 +1247,7 @@ function render(keep) {
   const subs = { home: t("app"), library: t("losSub"), references: t("refsPageSub"), events: t("upcoming"), quizzes: t("quizzesSub"), revision: t("revisionSub"), joint: t("jointSub"), support: t("supportSub"), admin: t("adminSub"), quiz: "", account: t("accountSub") };
   const logo = ["joint", "account", "support", "admin", "quiz"].includes(S.tab) ? "" : (ci.logo || CFG.LOGOS?.[S.club]) ? `<img src="${esc(ci.logo || CFG.LOGOS[S.club])}" alt="">` : `<div class="glyph" aria-hidden="true" style="background:${ci.color}">${esc(ci.glyph || t(S.club).slice(0, 2))}</div>`;
   const back = CHILD.includes(S.tab) ? `<button class="icon-btn" data-go="home" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
+    : !isAdmin() && !gate() && ["support", "account"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
     : ["home", "library", "events"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
   const app = document.getElementById("app");
   const fu = document.getElementById("f-user"), fn = document.getElementById("f-name");
