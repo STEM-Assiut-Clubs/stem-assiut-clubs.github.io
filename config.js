@@ -22,6 +22,9 @@ window.APP_CONFIG = {
   // جرايد اتشالت من التطبيق: مفيش لها تاب، والمحتوى اللي متسجل لها بس (مثلًا 12) بيفضل مخفي مش بيظهر في جرايد تانية.
   // Grades that were removed: no tab, and content tagged only with them (for example 12) stays hidden instead of showing in other grades.
   RETIRED_GRADES: ["12"],
+  // أكبر حجم لملف يترفع من الجهاز (بالميجا). لازم يبقى نفس الرقم MAX_UPLOAD_MB في Code.gs.
+  // Largest file (in MB) that can be uploaded from the device. Keep it equal to MAX_UPLOAD_MB in Code.gs.
+  MAX_UPLOAD_MB: 25,
   CLUBS: [
     { id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC", logo: "icons/chemistry_logo.png" },
     { id: "physics",   color: "#1F5FD1", tint: "#E8F0FD", logo: "icons/physics_logo.png" },
