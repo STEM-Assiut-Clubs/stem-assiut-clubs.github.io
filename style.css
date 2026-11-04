@@ -110,3 +110,17 @@ input[type=file]{font:inherit;padding:10px 0}
 
 /* grade picker */
 .seg.grades button{padding:0 4px;font-size:13px;min-width:0}
+
+/* upload progress card: colour follows the club the file is for */
+.up{--up:var(--accent);margin:10px 0;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--up) 9%,var(--card,#fff));border:1px solid color-mix(in srgb,var(--up) 30%,transparent);text-align:start;transition:background .3s,border-color .3s}
+.up-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+.up-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-weight:600}
+.up-pct{color:var(--up);font-variant-numeric:tabular-nums;font-size:15px}
+.up-track{height:12px;border-radius:99px;background:color-mix(in srgb,var(--up) 18%,transparent);overflow:hidden;margin:9px 0 6px}
+.up-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--up),color-mix(in srgb,var(--up) 60%,#fff));transition:width .25s ease,background .3s;position:relative;overflow:hidden}
+.up.send .up-fill::after,.up.save .up-fill::after,.up.read .up-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:upshine 1.2s infinite}
+.up.save .up-fill,.up.read .up-fill{width:100%!important;opacity:.55}
+.up.done .up-fill{opacity:1}
+.up-sub{color:var(--muted,#667);font-size:12px}
+@keyframes upshine{to{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){.up-fill,.up-fill::after{animation:none!important;transition:none}}
