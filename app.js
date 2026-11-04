@@ -64,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: `Pick a file from your device (max ${MAX_MB} MB), or paste a link below`, uploading: "Uploading…", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -80,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)، أو الصق لينك تحت`, uploading: "جاري الرفع…", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 5";
+const VERSION = "final version 6";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -676,6 +676,7 @@ async function admSave() {
   if (!f || A.busy) return;
   A.err = "";
   if (!f.clubs.length) { A.err = t("err_invalid_club"); render(true); return; }
+  if (A.kind !== "event" && !f.url) { A.err = t("err_no_file"); render(true); return; }
   const club = f.clubs.join("+");
   const item = A.kind === "event"
     ? { club, title: f.title, date: f.date, time: f.time, place: f.place, note: f.note, grade: gradeStr(f) }
@@ -867,7 +868,6 @@ function adminForm() {
       + `<label>${t("uploadFile")}</label><input id="af-file" class="vh" type="file" data-af-file><label class="btn ghost filebtn" for="af-file">📎 ${t("chooseFile")}</label>`
       + `<p class="note" style="text-align:start;padding:0">${t("fileTypesHint")}</p>`
       + progressHtml()
-      + inp("url", t("fUrl"), "url", 'required dir="ltr" placeholder="https://"')
       + inp("description", t("fDesc"), "text", 'maxlength="300"') + inp("lo", t("fLo"), "text", 'maxlength="80"') + inp("date", t("fDateOpt"), "date");
   const reqExtra = A.req ? `<p class="note" style="text-align:start">${t("reqHint")}</p>` : "";
   const reqNote = A.req ? inp("reqnote", t("reqNote"), "text", 'maxlength="300"') : "";
