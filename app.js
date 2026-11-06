@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 16";
+const VERSION = "final version 17";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -449,7 +449,7 @@ async function changePassword() {
 }
 function langPicker() {
   const b = (code, label) => `<button data-act="setlang" data-v="${code}" class="${S.lang === code ? "on" : ""}" aria-pressed="${S.lang === code}">${label}</button>`;
-  return `<div class="card" style="display:block;cursor:default"><b>${icon("globe", 18)} ${t("langTitle")}</b><div class="seg" role="group" aria-label="${t("langTitle")}" style="margin-top:10px">${b("ar", "العربية")}${b("en", "English")}</div></div>`;
+  return `<div class="card" style="display:block;cursor:default"><b>${icon("globe", 18)} ${t("langTitle")}</b><div class="seg" dir="ltr" role="group" aria-label="${t("langTitle")}" style="margin-top:10px">${b("en", "English")}${b("ar", "العربية")}</div></div>`;
 }
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
