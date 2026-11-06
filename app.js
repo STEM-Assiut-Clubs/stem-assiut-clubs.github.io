@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 13";
+const VERSION = "final version 14";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -633,6 +633,7 @@ const clubName = (c) => (clubInfo(c) ? t(c) : c);
 // the admin area is coloured by who is signed in: a club's admin gets that club's colour, the main admin gets a colour no club uses
 const SUPER_THEME = { color: "#1E293B", tint: "#E7EBF2" };
 const adminTheme = () => (isSuper() ? SUPER_THEME : clubInfo(roleClubs()[0]) || SUPER_THEME);
+const APP_THEME = { color: "#2B1B6B", tint: "#ECE9F8" };
 const roleLabel = (r) => (!r ? t("student") : r.super ? t("roleSuper") : (r.clubs || []).map(clubName).join(" + ") || t("student"));
 const parseRoleStr = (str) => { const o = { super: false, clubs: [] }; String(str || "").split(/[+,&\/|;؛\s]+/).forEach((p) => { p = p.trim().toLowerCase(); if (p === "super") o.super = true; else if (p && !o.clubs.includes(p)) o.clubs.push(p); }); return o; };
 const TYPE_KEY = { file: "files", video: "videos", reference: "refs", quiz: "quizzes", revision: "revisionMaterial", exam: "exams" };
@@ -1214,10 +1215,10 @@ function welcomeHtml(vis) {
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
     <p class="wel-pick">${t("welcomePick")}</p>
     <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div>
-    ${isAdmin() ? "" : `<div class="wnav" role="navigation">${CFG.API_URL ? `<button data-go="support" aria-label="${t("support")}">${icon("support")}<span>${t("support")}</span>${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button>` : ""}<button class="mid" data-act="lang" aria-label="Language">${icon("globe")}<span>${t("lang")}</span></button>${CFG.API_URL ? `<button data-go="account" aria-label="${t("account")}">${icon("user")}<span>${t("account")}</span></button>` : ""}</div>`}</div>`;
+    ${isAdmin() || !CFG.API_URL ? "" : `<div class="wnav" role="navigation">${CFG.API_URL ? `<button data-go="support" aria-label="${t("support")}">${icon("support")}<span>${t("support")}</span>${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button>` : ""}${CFG.API_URL ? `<button data-go="account" aria-label="${t("account")}">${icon("user")}<span>${t("account")}</span></button>` : ""}</div>`}</div>`;
 }
 function navHtml() {
-  if (gate() || (S.tab === "welcome" && !isAdmin())) return "";
+  if (gate() || (!isAdmin() && ["welcome", "account", "support"].includes(S.tab))) return ""; // profile & support belong to the app, not to a club
   // while a quiz is being taken there is no way out except the confirmed "leave" button
   if (S.tab === "quiz" && S.qz && ["ready", "submitting"].includes(S.qz.state) && !isAdmin()) return "";
   const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
@@ -1243,7 +1244,7 @@ function render(keep) {
   const prev = keep ? document.querySelector("main")?.scrollTop : 0;
   const root = document.documentElement;
   const ci = clubInfo(S.club);
-  const th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : ci;
+  const th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : !isAdmin() && ["account", "support"].includes(S.tab) ? APP_THEME : ci;
   root.style.setProperty("--accent", th.color); root.style.setProperty("--tint", th.tint || "#F1EBFC");
   root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
   document.querySelector('meta[name="theme-color"]').content = th.color;
@@ -1269,7 +1270,7 @@ function render(keep) {
   if (fm) S.draft = fm.value;
   const keepFocusQ = document.activeElement?.id === "q";
   app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
-    <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button>${["admin", "account", "support"].includes(S.tab) || gate() ? `<button class="icon-btn" data-act="lang">${t("lang")}</button>` : ""}</div>
+    ${S.tab === "account" ? "" : `<button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button>`}${S.tab === "admin" || gate() ? `<button class="icon-btn" data-act="lang">${t("lang")}</button>` : ""}</div>
   </header>
   <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${gradeBar()}${screens[S.tab]()}</main>
   ${navHtml()}`;
