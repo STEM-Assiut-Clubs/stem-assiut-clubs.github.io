@@ -64,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", langTitle: "Language", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -80,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", langTitle: "اللغة", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 11";
+const VERSION = "final version 13";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -447,9 +447,13 @@ async function changePassword() {
   } catch { P.err = t("err_generic"); }
   P.busy = false; render(true);
 }
+function langPicker() {
+  const b = (code, label) => `<button data-act="setlang" data-v="${code}" class="${S.lang === code ? "on" : ""}" aria-pressed="${S.lang === code}">${label}</button>`;
+  return `<div class="card" style="display:block;cursor:default"><b>${icon("globe", 18)} ${t("langTitle")}</b><div class="seg" role="group" aria-label="${t("langTitle")}" style="margin-top:10px">${b("ar", "العربية")}${b("en", "English")}</div></div>`;
+}
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${langPicker()}${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
   const reg = S.acct.mode === "register";
   return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
@@ -626,6 +630,9 @@ const myClubs = () => (isSuper() ? CLUB_LIST.map((c) => c.id) : roleClubs());
 // A club admin manages an item only if EVERY club on it is theirs. Shared items are the main admin's (club admins send a request).
 const canManage = (x) => isAdmin() && (isSuper() || (x.clubs.length > 0 && !x.clubs.includes("*") && x.clubs.every((c) => (S.user.role.clubs || []).includes(c))));
 const clubName = (c) => (clubInfo(c) ? t(c) : c);
+// the admin area is coloured by who is signed in: a club's admin gets that club's colour, the main admin gets a colour no club uses
+const SUPER_THEME = { color: "#1E293B", tint: "#E7EBF2" };
+const adminTheme = () => (isSuper() ? SUPER_THEME : clubInfo(roleClubs()[0]) || SUPER_THEME);
 const roleLabel = (r) => (!r ? t("student") : r.super ? t("roleSuper") : (r.clubs || []).map(clubName).join(" + ") || t("student"));
 const parseRoleStr = (str) => { const o = { super: false, clubs: [] }; String(str || "").split(/[+,&\/|;؛\s]+/).forEach((p) => { p = p.trim().toLowerCase(); if (p === "super") o.super = true; else if (p && !o.clubs.includes(p)) o.clubs.push(p); }); return o; };
 const TYPE_KEY = { file: "files", video: "videos", reference: "refs", quiz: "quizzes", revision: "revisionMaterial", exam: "exams" };
@@ -1236,9 +1243,10 @@ function render(keep) {
   const prev = keep ? document.querySelector("main")?.scrollTop : 0;
   const root = document.documentElement;
   const ci = clubInfo(S.club);
-  root.style.setProperty("--accent", ci.color); root.style.setProperty("--tint", ci.tint || "#F1EBFC");
+  const th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : ci;
+  root.style.setProperty("--accent", th.color); root.style.setProperty("--tint", th.tint || "#F1EBFC");
   root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
-  document.querySelector('meta[name="theme-color"]').content = clubColor(S.club);
+  document.querySelector('meta[name="theme-color"]').content = th.color;
   if (S.tab === "welcome") {
     document.querySelector('meta[name="theme-color"]').content = "#0B1026";
     document.getElementById("app").innerHTML = welcomeHtml(vis) + (isAdmin() ? navHtml() : "");
@@ -1276,7 +1284,7 @@ function render(keep) {
 const histKey = () => S.tab + "|" + S.club;
 function syncHistory() {
   const k = histKey(), g = gate() ? 1 : 0, cur = history.state;
-  if (cur && cur.k === k) return;
+  if (cur && (cur.k === k || cur.viewer)) return;
   const st = { k, tab: S.tab, club: S.club, g };
   try { if (!cur || cur.g || g) history.replaceState(st, ""); else history.pushState(st, ""); } catch {}
 }
@@ -1305,6 +1313,7 @@ document.addEventListener("click", (e) => {
   else if (el.dataset.grade) { S.grade = el.dataset.grade; store.set("grade", S.grade); }
   else if (el.dataset.filterSet) S.filter = el.dataset.filterSet;
   else if (el.dataset.go) { S.supOk = false; S.supErr = ""; S.tab = el.dataset.go; S.filter = el.dataset.filter || "all"; S.q = ""; }
+  else if (el.dataset.act === "setlang") { S.lang = el.dataset.v === "en" ? "en" : "ar"; store.set("lang", S.lang); }
   else if (el.dataset.act === "lang") { S.lang = S.lang === "ar" ? "en" : "ar"; store.set("lang", S.lang); }
   else if (el.dataset.act === "refresh") {
     toast(t("refreshing"), 0);
