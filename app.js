@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 12";
+const VERSION = "final version 13";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -630,6 +630,9 @@ const myClubs = () => (isSuper() ? CLUB_LIST.map((c) => c.id) : roleClubs());
 // A club admin manages an item only if EVERY club on it is theirs. Shared items are the main admin's (club admins send a request).
 const canManage = (x) => isAdmin() && (isSuper() || (x.clubs.length > 0 && !x.clubs.includes("*") && x.clubs.every((c) => (S.user.role.clubs || []).includes(c))));
 const clubName = (c) => (clubInfo(c) ? t(c) : c);
+// the admin area is coloured by who is signed in: a club's admin gets that club's colour, the main admin gets a colour no club uses
+const SUPER_THEME = { color: "#1E293B", tint: "#E7EBF2" };
+const adminTheme = () => (isSuper() ? SUPER_THEME : clubInfo(roleClubs()[0]) || SUPER_THEME);
 const roleLabel = (r) => (!r ? t("student") : r.super ? t("roleSuper") : (r.clubs || []).map(clubName).join(" + ") || t("student"));
 const parseRoleStr = (str) => { const o = { super: false, clubs: [] }; String(str || "").split(/[+,&\/|;؛\s]+/).forEach((p) => { p = p.trim().toLowerCase(); if (p === "super") o.super = true; else if (p && !o.clubs.includes(p)) o.clubs.push(p); }); return o; };
 const TYPE_KEY = { file: "files", video: "videos", reference: "refs", quiz: "quizzes", revision: "revisionMaterial", exam: "exams" };
@@ -1240,9 +1243,10 @@ function render(keep) {
   const prev = keep ? document.querySelector("main")?.scrollTop : 0;
   const root = document.documentElement;
   const ci = clubInfo(S.club);
-  root.style.setProperty("--accent", ci.color); root.style.setProperty("--tint", ci.tint || "#F1EBFC");
+  const th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : ci;
+  root.style.setProperty("--accent", th.color); root.style.setProperty("--tint", th.tint || "#F1EBFC");
   root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
-  document.querySelector('meta[name="theme-color"]').content = clubColor(S.club);
+  document.querySelector('meta[name="theme-color"]').content = th.color;
   if (S.tab === "welcome") {
     document.querySelector('meta[name="theme-color"]').content = "#0B1026";
     document.getElementById("app").innerHTML = welcomeHtml(vis) + (isAdmin() ? navHtml() : "");
