@@ -64,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", langTitle: "Language", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", bigTitle: `This file is bigger than ${MAX_MB} MB. Add it from Google Drive instead:`, bigS1: "Upload the file to your Google Drive.", bigS2: "Tap Share and set it to “Anyone with the link” (Viewer).", bigS3: "Copy the link and paste it below, then save.", deleteAcct: "Delete account", confirmDelete: "Delete this account for good? The person will be signed out and their quiz results stay in the sheet.", userDeleted: "Account deleted", err_is_super: "Remove their main-admin role first, then delete the account.", langTitle: "Language", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -80,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", langTitle: "اللغة", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", bigTitle: `الملف أكبر من ${MAX_MB} ميجا. ضيفه من جوجل درايف بدل كده:`, bigS1: "ارفع الملف على جوجل درايف بتاعك.", bigS2: "دوس مشاركة (Share) واختار “أي شخص معه الرابط” (Viewer).", bigS3: "انسخ اللينك والصقه تحت وبعدين احفظ.", deleteAcct: "حذف الحساب", confirmDelete: "تحذف الحساب ده نهائي؟ صاحبه هيتسجل خروجه ونتايج الكويزات بتاعته هتفضل في الشيت.", userDeleted: "الحساب اتحذف", err_is_super: "شيل منه صلاحية المشرف العام الأول، وبعدين احذف الحساب.", langTitle: "اللغة", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 14";
+const VERSION = "final version 15";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -162,7 +162,7 @@ const visibleIds = () => {
 const visClubs = () => CLUB_LIST.filter((c) => visibleIds().includes(c.id));
 const gate = () => (!CFG.API_URL ? "" : !S.user ? "login" : S.user.temp ? "password" : "");
 const seesItem = (x) => !CFG.API_URL || S.user?.role?.super || x.clubs.includes("*") || x.clubs.some((c) => visibleIds().includes(c));
-const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", prog: null, reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
+const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", prog: null, big: false, reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
 S.adm = newAdm();
 S.pw = { old: "", new: "", err: "", busy: false };
 S.preview = false;
@@ -658,7 +658,7 @@ async function refreshMe() {
 
 function admOpen(kind, it, req) {
   const A = S.adm, mine = myClubs();
-  A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.prog = null; A.editId = it ? it.id : "";
+  A.err = ""; A.kind = kind; A.req = !!req; A.uploading = ""; A.prog = null; A.big = false; A.editId = it ? it.id : "";
   const def = mine.includes(S.club) ? [S.club] : mine.slice(0, 1);
   A.form = it
     ? { clubs: it.clubs[0] === "*" ? ["all"] : [...it.clubs], title: it.title || "", date: it.ds || "", time: it.time || "", place: it.place || "", note: it.note || "", type: it.type || "file", description: it.desc || "", url: it.url || "", lo: it.lo || "", grades: gradesToForm(it.grades), reqnote: "" }
@@ -768,8 +768,8 @@ async function admUpload(file) {
   if (!file || !A.form) return;
   const ext = (file.name.split(".").pop() || "").toLowerCase();
   if (!UPLOAD_EXTS.includes(ext)) { A.err = t("err_invalid_file") + " (" + UPLOAD_EXTS.join(", ") + ")"; A.prog = null; render(true); return; }
-  if (file.size > MAX_MB * 1024 * 1024) { A.err = t("err_too_big"); A.prog = null; render(true); return; }
-  A.err = ""; A.uploading = file.name; A.prog = { name: file.name, size: file.size, pct: 0, phase: "read" }; render(true); paintProg();
+  if (file.size > MAX_MB * 1024 * 1024) { A.big = true; A.err = ""; A.prog = null; render(true); return; }
+  A.err = ""; A.big = false; A.uploading = file.name; A.prog = { name: file.name, size: file.size, pct: 0, phase: "read" }; render(true); paintProg();
   try {
     const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1] || ""); fr.onerror = () => rej(new Error("read")); fr.readAsDataURL(file); });
     setProg({ phase: "send", pct: 0 });
@@ -845,6 +845,15 @@ async function admResetPw(username) {
     toast(admErr(r), 3000);
   } catch { toast(t("err_generic"), 3000); }
 }
+async function admDeleteUser(username) {
+  if (!confirm(t("confirmDelete") + "\n@" + username)) return;
+  try {
+    const r = await api("adminDeleteUser", { token: S.user.token, username });
+    if (r.ok) { S.adm.users.list = S.adm.users.list.filter((x) => x.username !== username); toast(t("userDeleted"), 2200); render(true); return; }
+    if (r.error === "auth") { signOut(); return; }
+    toast(admErr(r), 3000);
+  } catch { toast(t("err_generic"), 3000); }
+}
 async function admSaveRole() {
   const A = S.adm, e = A.roleEdit;
   if (!e) return;
@@ -877,6 +886,7 @@ function adminForm() {
       + `<label>${t("uploadFile")}</label><input id="af-file" class="vh" type="file" data-af-file><label class="btn ghost filebtn" for="af-file">📎 ${t("chooseFile")}</label>`
       + `<p class="note" style="text-align:start;padding:0">${t("fileTypesHint")}</p>`
       + progressHtml()
+      + (A.big ? `<div class="warn" role="alert" style="text-align:start"><b>${t("bigTitle")}</b><ol style="margin:8px 0 0;padding-inline-start:20px"><li>${t("bigS1")}</li><li>${t("bigS2")}</li><li>${t("bigS3")}</li></ol></div>` + inp("url", t("fUrl"), "url", 'dir="ltr" placeholder="https://drive.google.com/…"') : "")
       + inp("description", t("fDesc"), "text", 'maxlength="300"') + inp("lo", t("fLo"), "text", 'maxlength="80"') + inp("date", t("fDateOpt"), "date");
   const reqExtra = A.req ? `<p class="note" style="text-align:start">${t("reqHint")}</p>` : "";
   const reqNote = A.req ? inp("reqnote", t("reqNote"), "text", 'maxlength="300"') : "";
@@ -985,7 +995,7 @@ function admTeam() {
     const r = parseRoleStr(u.role), isMe = u.username === S.user.username;
     return `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(u.name)}</b><span dir="ltr">@${esc(u.username)}</span></div>
       <span class="badge">${esc(r.super || r.clubs.length ? roleLabel(r) : t("student"))}</span>
-      ${isMe ? "" : `<button class="mini" data-adm="role-edit" data-u="${esc(u.username)}">${t("changeRole")}</button><button class="mini" data-adm="pw-reset" data-u="${esc(u.username)}">${t("resetPw")}</button>`}</div>`;
+      ${isMe ? "" : `<button class="mini" data-adm="role-edit" data-u="${esc(u.username)}">${t("changeRole")}</button><button class="mini" data-adm="pw-reset" data-u="${esc(u.username)}">${t("resetPw")}</button>${/(^|\+)super$/.test(u.role || "") ? "" : `<button class="mini danger" data-adm="user-del" data-u="${esc(u.username)}">${t("deleteAcct")}</button>`}`}</div>`;
   };
   const shown = A.pwShown ? `<div class="hero"><small>${t("tempPwTitle")} @${esc(A.pwShown.username)}</small><b dir="ltr" style="font-size:28px;letter-spacing:.14em;user-select:all">${esc(A.pwShown.password)}</b><span>${t("tempPwNote")}</span></div><div class="row-actions"><button class="mini primary" data-adm="pw-copy">${t("copy")}</button><button class="mini" data-adm="pw-close">${t("close")}</button></div>` : "";
   return `${shown}<input id="q" type="search" placeholder="${esc(t("searchUsers"))}" value="${esc(S.q)}" dir="auto">${list.map(tile).join("") || `<p class="note">${t("empty")}</p>`}`;
@@ -1148,6 +1158,7 @@ document.addEventListener("click", (e) => {
   else if (d.adm === "role-edit") { const u = A.users.list.find((x) => x.username === d.u); if (u) { const r = parseRoleStr(u.role); A.roleEdit = { username: u.username, super: r.super, clubs: r.clubs.filter((c) => clubInfo(c)) }; render(true); } }
   else if (d.adm === "role-save") admSaveRole();
   else if (d.adm === "pw-reset") admResetPw(d.u);
+  else if (d.adm === "user-del") admDeleteUser(d.u);
   else if (d.adm === "pw-copy") { navigator.clipboard?.writeText(A.pwShown?.password || "").then(() => toast(t("copied"), 1500)).catch(() => {}); }
   else if (d.adm === "pw-close") { A.pwShown = null; render(true); }
   else if (d.adm === "role-cancel") { A.roleEdit = null; render(true); }
