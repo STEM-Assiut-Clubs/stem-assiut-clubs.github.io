@@ -64,7 +64,7 @@ Object.assign(T.en, {
   err_attempts_done: "You've used all your attempts for this quiz.", err_invalid_questions: "Each question needs text, at least 2 options and one correct answer.",
   addQuiz: "+ Quiz", fhQuiz: "Quiz", question: "Question", option: "Option", correctMark: "Correct answer", addQuestion: "+ Question", addOption: "+ Option",
   explainLbl: "Explanation (optional)", results: "Results", noAttempts: "Nobody has taken this quiz yet.", qSection: "Quizzes",
-  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", bigTitle: `This file is bigger than ${MAX_MB} MB. Add it from Google Drive instead:`, bigS1: "Upload the file to your Google Drive.", bigS2: "Tap Share and set it to “Anyone with the link” (Viewer).", bigS3: "Copy the link and paste it below, then save.", deleteAcct: "Delete account", confirmDelete: "Delete this account for good? The person will be signed out and their quiz results stay in the sheet.", userDeleted: "Account deleted", err_is_super: "Remove their main-admin role first, then delete the account.", langTitle: "Language", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
+  uploadFile: `Pick a file from your device (max ${MAX_MB} MB)`, uploading: "Uploading…", bigBox: `File bigger than ${MAX_MB} MB`, pasteLink: "Paste the link here", bigTitle: "Add it from Google Drive:", bigS1: "Upload the file to your Google Drive.", bigS2: "Tap Share and set it to “Anyone with the link” (Viewer).", bigS3: "Copy the link and paste it below, then save.", deleteAcct: "Delete account", confirmDelete: "Delete this account for good? The person will be signed out and their quiz results stay in the sheet.", userDeleted: "Account deleted", err_is_super: "Remove their main-admin role first, then delete the account.", langTitle: "Language", welcomeHi: "Welcome", welcomePick: "Pick a club to see its grade 10 and 11 content", allClubs: "All clubs", welcomeNote: "Grades 10 · 11", err_no_file: "Choose a file from your device first.", upPrep: "Preparing the file…", upSaving: "Saving to Drive…", uploaded: "Uploaded ✓", err_too_big: `File is too big (max ${MAX_MB} MB).`, err_invalid_file: "This file type isn't allowed.",
   reqTitle: "Shared sessions", reqEvent: "Request shared event", reqMat: "Request shared material", reqNote: "Note to the main admin (optional)", reqSend: "Send request",
   reqSent: "Request sent ✓", reqHint: "A session shared between clubs needs the main admin's approval. Pick your club plus the other clubs.",
   myRequests: "My requests", adm_requests: "Requests", approve: "Approve", reject: "Reject", pending: "Pending", approved: "Approved", rejected: "Rejected",
@@ -80,7 +80,7 @@ Object.assign(T.ar, {
   err_attempts_done: "خلّصت كل محاولاتك في الكويز ده.", err_invalid_questions: "كل سؤال لازم يبقى له نص واختيارين على الأقل وإجابة صح واحدة.",
   addQuiz: "+ كويز", fhQuiz: "كويز", question: "سؤال", option: "اختيار", correctMark: "الإجابة الصح", addQuestion: "+ سؤال", addOption: "+ اختيار",
   explainLbl: "شرح (اختياري)", results: "النتائج", noAttempts: "لسه محدش حل الكويز ده.", qSection: "الكويزات",
-  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", bigTitle: `الملف أكبر من ${MAX_MB} ميجا. ضيفه من جوجل درايف بدل كده:`, bigS1: "ارفع الملف على جوجل درايف بتاعك.", bigS2: "دوس مشاركة (Share) واختار “أي شخص معه الرابط” (Viewer).", bigS3: "انسخ اللينك والصقه تحت وبعدين احفظ.", deleteAcct: "حذف الحساب", confirmDelete: "تحذف الحساب ده نهائي؟ صاحبه هيتسجل خروجه ونتايج الكويزات بتاعته هتفضل في الشيت.", userDeleted: "الحساب اتحذف", err_is_super: "شيل منه صلاحية المشرف العام الأول، وبعدين احذف الحساب.", langTitle: "اللغة", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
+  uploadFile: `اختار ملف من جهازك (حد أقصى ${MAX_MB} ميجا)`, uploading: "جاري الرفع…", bigBox: `ملف أكبر من ${MAX_MB} ميجا`, pasteLink: "ضع اللينك هنا", bigTitle: "ضيفه من جوجل درايف:", bigS1: "ارفع الملف على جوجل درايف بتاعك.", bigS2: "دوس مشاركة (Share) واختار “أي شخص معه الرابط” (Viewer).", bigS3: "انسخ اللينك والصقه تحت وبعدين احفظ.", deleteAcct: "حذف الحساب", confirmDelete: "تحذف الحساب ده نهائي؟ صاحبه هيتسجل خروجه ونتايج الكويزات بتاعته هتفضل في الشيت.", userDeleted: "الحساب اتحذف", err_is_super: "شيل منه صلاحية المشرف العام الأول، وبعدين احذف الحساب.", langTitle: "اللغة", welcomeHi: "أهلاً", welcomePick: "اختار النادي عشان تشوف محتوى الصف العاشر والحادي عشر", allClubs: "كل النوادي", welcomeNote: "الصف 10 · 11", err_no_file: "اختار ملف من جهازك الأول.", upPrep: "بجهّز الملف…", upSaving: "بيتحفظ على درايف…", uploaded: "اترفع ✓", err_too_big: `الملف كبير (الحد الأقصى ${MAX_MB} ميجا).`, err_invalid_file: "نوع الملف ده مش مسموح.",
   reqTitle: "الجلسات المشتركة", reqEvent: "اطلب موعد مشترك", reqMat: "اطلب مادة مشتركة", reqNote: "ملاحظة للمشرف العام (اختياري)", reqSend: "ابعت الطلب",
   reqSent: "الطلب اتبعت ✓", reqHint: "الجلسة المشتركة بين النوادي لازم المشرف العام يوافق عليها. اختار ناديك مع النوادي التانية.",
   myRequests: "طلباتي", adm_requests: "الطلبات", approve: "موافقة", reject: "رفض", pending: "في الانتظار", approved: "تمت الموافقة", rejected: "مرفوض",
@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 15";
+const VERSION = "final version 16";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -886,7 +886,8 @@ function adminForm() {
       + `<label>${t("uploadFile")}</label><input id="af-file" class="vh" type="file" data-af-file><label class="btn ghost filebtn" for="af-file">📎 ${t("chooseFile")}</label>`
       + `<p class="note" style="text-align:start;padding:0">${t("fileTypesHint")}</p>`
       + progressHtml()
-      + (A.big ? `<div class="warn" role="alert" style="text-align:start"><b>${t("bigTitle")}</b><ol style="margin:8px 0 0;padding-inline-start:20px"><li>${t("bigS1")}</li><li>${t("bigS2")}</li><li>${t("bigS3")}</li></ol></div>` + inp("url", t("fUrl"), "url", 'dir="ltr" placeholder="https://drive.google.com/…"') : "")
+      + `<div class="chips" style="margin-top:8px"><label class="chk"><input type="checkbox" data-abig="1"${A.big ? " checked" : ""}>${t("bigBox")}</label></div>`
+      + (A.big ? `<div class="warn" style="text-align:start"><b>${t("bigTitle")}</b><ol style="margin:8px 0 0;padding-inline-start:20px"><li>${t("bigS1")}</li><li>${t("bigS2")}</li><li>${t("bigS3")}</li></ol></div>` + inp("url", t("pasteLink"), "url", 'dir="ltr" placeholder="https://drive.google.com/…"') : "")
       + inp("description", t("fDesc"), "text", 'maxlength="300"') + inp("lo", t("fLo"), "text", 'maxlength="80"') + inp("date", t("fDateOpt"), "date");
   const reqExtra = A.req ? `<p class="note" style="text-align:start">${t("reqHint")}</p>` : "";
   const reqNote = A.req ? inp("reqnote", t("reqNote"), "text", 'maxlength="300"') : "";
@@ -1183,6 +1184,8 @@ document.addEventListener("change", (e) => {
     if (el.checked) { A.form.clubs = c === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), c]; if (c === "all" || cur.includes("all")) render(true); }
     else A.form.clubs = cur.filter((x) => x !== c);
     paintProg();
+  } else if (d.abig && A.form) {
+    A.big = el.checked; render(true);
   } else if (d.afg && A.form) {
     const g = d.afg, cur = A.form.grades || [];
     if (el.checked) {
