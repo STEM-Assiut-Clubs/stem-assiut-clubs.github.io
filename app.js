@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 10";
+const VERSION = "final version 11";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -192,6 +192,7 @@ const P = {
   revision: '<path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/>',
   exam: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
   quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 015 .5c0 1.5-2.5 2-2.5 3.5M12 17v.5"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 4 5.7 4 9s-1.4 6.3-4 9c-2.6-2.7-4-5.7-4-9s1.4-6.3 4-9z"/>',
   support: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10h6M9 13.5h4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
   eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
@@ -1202,10 +1203,11 @@ function welcomeHtml(vis) {
   const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
   const ext = (c) => `<a class="wc" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></a>`;
   const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
-  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span>${CFG.API_URL ? `<button class="wbtn" data-go="support" aria-label="${t("support")}" title="${t("support")}">${icon("support")}${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button><button class="wbtn" data-go="account" aria-label="${t("account")}" title="${t("account")}">${icon("user")}</button>` : ""}<button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="wbtn" data-act="lang">${t("lang")}</button></span></div>
+  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button></span></div>
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
     <p class="wel-pick">${t("welcomePick")}</p>
-    <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div></div>`;
+    <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div>
+    ${isAdmin() ? "" : `<div class="wnav" role="navigation">${CFG.API_URL ? `<button data-go="support" aria-label="${t("support")}">${icon("support")}<span>${t("support")}</span>${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button>` : ""}<button class="mid" data-act="lang" aria-label="Language">${icon("globe")}<span>${t("lang")}</span></button>${CFG.API_URL ? `<button data-go="account" aria-label="${t("account")}">${icon("user")}<span>${t("account")}</span></button>` : ""}</div>`}</div>`;
 }
 function navHtml() {
   if (gate() || (S.tab === "welcome" && !isAdmin())) return "";
@@ -1240,6 +1242,7 @@ function render(keep) {
   if (S.tab === "welcome") {
     document.querySelector('meta[name="theme-color"]').content = "#0B1026";
     document.getElementById("app").innerHTML = welcomeHtml(vis) + (isAdmin() ? navHtml() : "");
+    syncHistory();
     return;
   }
   const screens = { home, library, events: eventsScreen, quizzes: quizzesScreen, revision: revisionScreen, references: referencesScreen, joint: jointScreen, support: supportScreen, admin: adminScreen, quiz: quizScreen, account: accountScreen };
@@ -1258,7 +1261,7 @@ function render(keep) {
   if (fm) S.draft = fm.value;
   const keepFocusQ = document.activeElement?.id === "q";
   app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
-    <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button><button class="icon-btn" data-act="lang">${t("lang")}</button></div>
+    <button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button>${["admin", "account", "support"].includes(S.tab) || gate() ? `<button class="icon-btn" data-act="lang">${t("lang")}</button>` : ""}</div>
   </header>
   <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${gradeBar()}${screens[S.tab]()}</main>
   ${navHtml()}`;
@@ -1266,7 +1269,28 @@ function render(keep) {
   document.querySelector(".switch button.on")?.scrollIntoView({ inline: "center", block: "nearest" });
   if (keepFocusQ) { const q = document.getElementById("q"); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
   paintProg();
+  syncHistory();
 }
+
+// ---- back button / back gesture: step back through the screens the person opened instead of leaving the app ----
+const histKey = () => S.tab + "|" + S.club;
+function syncHistory() {
+  const k = histKey(), g = gate() ? 1 : 0, cur = history.state;
+  if (cur && cur.k === k) return;
+  const st = { k, tab: S.tab, club: S.club, g };
+  try { if (!cur || cur.g || g) history.replaceState(st, ""); else history.pushState(st, ""); } catch {}
+}
+window.addEventListener("popstate", (e) => {
+  const st = e.state; if (!st || !st.tab) return;
+  if (S.tab === "quiz" && S.qz && S.qz.state === "ready" && !isAdmin() && st.tab !== "quiz") {
+    if (!guardLeave()) { try { history.pushState({ k: histKey(), tab: S.tab, club: S.club, g: 0 }, ""); } catch {} return; } // stay on the quiz
+  }
+  S.tab = st.tab; if (clubInfo(st.club)) { S.club = st.club; store.set("club", S.club); }
+  S.supOk = false; S.supErr = ""; S.q = ""; render();
+  if (S.tab === "quizzes") loadResults();
+  if (S.tab === "support") loadSupport();
+  if (S.tab === "admin") loadAdminInbox();
+});
 
 document.addEventListener("click", (e) => {
   const el = e.target.closest("[data-go],[data-club],[data-grade],[data-act],[data-filter-set],[data-lo],[data-acct-mode]");
@@ -1305,6 +1329,7 @@ window.addEventListener("pagehide", lockQuiz);
 window.addEventListener("blur", lockQuiz);
 
 render();
+try { history.replaceState({ k: histKey(), tab: S.tab, club: S.club, g: gate() ? 1 : 0 }, ""); } catch {}
 loadAll();
 if (S.user) { loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); qzRecover(); }
 // check for team replies every minute while the app is open
