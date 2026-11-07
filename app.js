@@ -132,7 +132,7 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 17";
+const VERSION = "final version 18";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -583,7 +583,7 @@ function home() {
   const when = next ? new Intl.DateTimeFormat(locale(), { weekday: "long", day: "numeric", month: "long" }).format(next.date) + [next.time && " · " + next.time, next.place && " · " + next.place].filter(Boolean).join("") : "";
   const recent = recentFirst(gres().filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type))).slice(0, 3);
   const tile = (ic, b, s, tab, f, wide) => `<button class="tile${wide ? " wide" : ""}" data-go="${tab}" data-filter="${f || "all"}">${icon(ic, 26)}<b>${t(b)}</b><span>${t(s)}</span></button>`;
-  return `<div class="hero"><small>${t("next")}</small><b dir="auto">${next ? esc(next.title) : t("noNext")}</b><span dir="auto">${esc(when)}</span></div>
+  return `<button class="hero herobtn" data-go="events"><small>${t("next")}</small><b dir="auto">${next ? esc(next.title) : t("noNext")}</b><span dir="auto">${esc(when)}</span><em class="hero-more">${t("events")} ${S.lang === "ar" ? "‹" : "›"}</em></button>
   <div class="grid">${tile("book", "los", "losSub", "library")}${tile("reference", "refs", "refsSub", "references")}${tile("revision", "revision", "revisionSub", "revision")}${tile("quiz", "quizzes", "quizzesSub", "quizzes")}${tile("joint", "jointSpace", "jointSub", "joint", "all", true)}</div>
   <h2>${t("recent")}</h2>${recent.map(resTile).join("") || empty()}`;
 }
@@ -1232,7 +1232,7 @@ function welcomeHtml(vis) {
     ${isAdmin() || !CFG.API_URL ? "" : `<div class="wnav" role="navigation">${CFG.API_URL ? `<button data-go="support" aria-label="${t("support")}">${icon("support")}<span>${t("support")}</span>${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button>` : ""}${CFG.API_URL ? `<button data-go="account" aria-label="${t("account")}">${icon("user")}<span>${t("account")}</span></button>` : ""}</div>`}</div>`;
 }
 function navHtml() {
-  if (gate() || (!isAdmin() && ["welcome", "account", "support"].includes(S.tab))) return ""; // profile & support belong to the app, not to a club
+  if (gate() || !isAdmin()) return ""; // students move around with the cards on the pages themselves; only admins keep a bottom bar
   // while a quiz is being taken there is no way out except the confirmed "leave" button
   if (S.tab === "quiz" && S.qz && ["ready", "submitting"].includes(S.qz.state) && !isAdmin()) return "";
   const inPreview = isAdmin() && S.preview && !["admin", "account"].includes(S.tab);
@@ -1272,9 +1272,9 @@ function render(keep) {
   const titles = { home: t(S.club), library: t("library"), references: t("refsTitle"), events: t("events"), quizzes: t("quizzes"), revision: t("revisionTitle"), joint: t("jointSpace"), support: t("support"), admin: t("admin"), quiz: t("quizzes"), account: t("account") };
   const subs = { home: t("app"), library: t("losSub"), references: t("refsPageSub"), events: t("upcoming"), quizzes: t("quizzesSub"), revision: t("revisionSub"), joint: t("jointSub"), support: t("supportSub"), admin: t("adminSub"), quiz: "", account: t("accountSub") };
   const logo = ["joint", "account", "support", "admin", "quiz"].includes(S.tab) ? "" : (ci.logo || CFG.LOGOS?.[S.club]) ? `<img src="${esc(ci.logo || CFG.LOGOS[S.club])}" alt="">` : `<div class="glyph" aria-hidden="true" style="background:${ci.color}">${esc(ci.glyph || t(S.club).slice(0, 2))}</div>`;
-  const back = CHILD.includes(S.tab) ? `<button class="icon-btn" data-go="home" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
+  const back = [...CHILD, "library", "events"].includes(S.tab) ? `<button class="icon-btn" data-go="home" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
     : !isAdmin() && !gate() && ["support", "account"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>`
-    : ["home", "library", "events"].includes(S.tab) ? `<button class="icon-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
+    : S.tab === "home" ? `<button class="icon-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${S.lang === "ar" ? "→" : "←"}</button>` : "";
   const app = document.getElementById("app");
   const fu = document.getElementById("f-user"), fn = document.getElementById("f-name");
   if (fu) S.form.username = fu.value;
