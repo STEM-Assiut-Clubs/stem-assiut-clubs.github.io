@@ -149,7 +149,7 @@ Object.assign(T.ar, {
 Object.assign(T.en, { viewerHint: "If the page stays blank, that website does not allow opening inside other apps. Tap \u201cOpen in browser\u201d." });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 23";
+const VERSION = "final version 24";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -173,8 +173,7 @@ const visibleIds = () => {
   if (!CFG.API_URL) return all;
   const u = S.user; if (!u) return [];
   if (u.role?.super) return all;
-  const mine = roleClubs();
-  return mine.length ? mine : all;
+  return all; // students and club admins alike see every club in the student view
 };
 const visClubs = () => CLUB_LIST.filter((c) => visibleIds().includes(c.id));
 const gate = () => (!CFG.API_URL ? "" : !S.user ? "login" : S.user.temp ? "password" : "");
@@ -683,6 +682,9 @@ const canManage = (x) => isAdmin() && (isSuper() || (x.clubs.length > 0 && !x.cl
 const clubName = (c) => (clubInfo(c) ? t(c) : c);
 // the admin area is coloured by who is signed in: a club's admin gets that club's colour, the main admin gets a colour no club uses
 const SUPER_THEME = { color: "#1E293B", tint: "#E7EBF2" };
+const mixHex = (a, b, k) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); const x = p(a), y = p(b); return "#" + x.map((v, i) => Math.round(v * k + y[i] * (1 - k)).toString(16).padStart(2, "0")).join(""); };
+// in dark mode every club colour is calmed toward the indigo background so big coloured blocks do not glare
+const darkTheme = (th) => (th === SUPER_THEME || th === APP_THEME ? SUPER_THEME_DARK : { color: mixHex(th.color, "#8A82D0", 0.58), tint: mixHex(th.color, "#383269", 0.3) });
 const SUPER_THEME_DARK = { color: "#6A60D0", tint: "#433D7E" }; // the near-black admin colour is too heavy on the soft dark background
 const adminTheme = () => (isSuper() ? SUPER_THEME : clubInfo(roleClubs()[0]) || SUPER_THEME);
 const APP_THEME = { color: "#2B1B6B", tint: "#ECE9F8" };
@@ -1360,7 +1362,7 @@ function render(keep) {
   const root = document.documentElement;
   const ci = clubInfo(S.club);
   let th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : !isAdmin() && ["account", "support"].includes(S.tab) ? APP_THEME : ci;
-  if ((th === SUPER_THEME || th === APP_THEME) && S.theme === "dark") th = SUPER_THEME_DARK;
+  if (S.theme === "dark") th = darkTheme(th);
   root.style.setProperty("--accent", th.color); root.style.setProperty("--tint", th.tint || "#F1EBFC");
   root.dataset.theme = S.theme; root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
   document.querySelector('meta[name="theme-color"]').content = S.theme === "dark" ? "#2B2657" : th.color;

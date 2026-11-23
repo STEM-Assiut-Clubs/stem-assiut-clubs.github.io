@@ -347,3 +347,5 @@ input[type=file]{font:inherit;padding:10px 0}
 :root[data-theme="dark"] .btn:not(.ghost){background:var(--accent);color:#fff}
 :root[data-theme="dark"] .note{color:var(--muted)}
 :root[data-theme="dark"] .lo{background:var(--surface)}
+:root[data-theme="dark"] nav button.on svg,:root[data-theme="dark"] nav button.on{color:#fff}
+:root[data-theme="dark"] nav button.on svg{color:var(--accent-fg)}
