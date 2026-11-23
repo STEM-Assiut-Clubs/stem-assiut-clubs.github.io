@@ -32,5 +32,8 @@ window.APP_CONFIG = {
     { id: "mechanics", color: "#0F766E", tint: "#E3F5F3", logo: "icons/mechanics_logo.png" },
     { id: "capstone",  color: "#BE185D", tint: "#FCE9F1", logo: "icons/capstone_logo.png" },
     { id: "math",      color: "#15803D", tint: "#E6F5EB", logo: "icons/math_logo.png" },
+    { id: "geology",   color: "#52667A", tint: "#E8EDF2", logo: "", glyph: "Ge" }, // logo coming: put the file in icons/ and set logo: "icons/geology_logo.png"
+    { id: "english",   color: "#8B1E2D", tint: "#F9EAEC", logo: "icons/english_logo.png" },
+    { id: "arabic",    color: "#8F6A00", tint: "#F8F0DA", logo: "", glyph: "ع" }, // logo coming: icons/arabic_logo.png
   ],
 };
