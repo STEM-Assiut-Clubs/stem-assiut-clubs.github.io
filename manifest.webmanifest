@@ -4,8 +4,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#FAFAFC",
-  "theme_color": "#6D3FC7",
+  "background_color": "#0B1026",
+  "theme_color": "#1A1556",
   "icons": [
     {
       "src": "icons/app-icon-192.png",
@@ -28,7 +28,7 @@
   ],
   "id": "./",
   "description": "Science, language and engineering clubs of STEM Asyut",
-  "orientation": "portrait",
+  "orientation": "any",
   "categories": [
     "education"
   ]

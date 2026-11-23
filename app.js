@@ -132,7 +132,21 @@ Object.assign(T.ar, {
   err_no_attempt: "المحاولة دي اتلغت قبل كده. افتح الكويز تاني عشان تبدأ محاولة جديدة.",
 });
 
-const VERSION = "final version 18";
+Object.assign(T.en, { themeTitle: "Appearance", themeLight: "Light", themeDark: "Dark", exploreT: "Explore" });
+Object.assign(T.ar, { themeTitle: "المظهر", themeLight: "فاتح", themeDark: "داكن", exploreT: "استكشف" });
+
+Object.assign(T.en, {
+  qzModeQ: "Write questions", qzModeLink: "Google Forms link", fQuizLink: "Quiz link (Google Forms or any website)", quizLinkHint: "Paste the link of your Google Form. Students open it from the Quizzes page, no need to write the questions here.",
+  fMinutes: "Time limit", minNone: "No time limit", minWord: "min", minutesHint: "When the time is up, the answers are sent automatically.",
+  qzTimeLeft: "Time left", qzTimeNote: "Time limit: {n} min. When time is up your answers are submitted automatically.", qzTimeUp: "Time is up. Your answers were submitted.", err_no_link: "Add a valid link that starts with https://",
+});
+Object.assign(T.ar, {
+  qzModeQ: "اكتب الأسئلة", qzModeLink: "لينك Google Forms", fQuizLink: "لينك الكويز (Google Forms أو أي موقع)", quizLinkHint: "الصق لينك الفورم. الطلاب بيفتحوه من صفحة الكويزات من غير ما تكتب الأسئلة هنا.",
+  fMinutes: "وقت الكويز", minNone: "من غير وقت", minWord: "دقيقة", minutesHint: "لما الوقت يخلص، الإجابات بتتبعت لوحدها.",
+  qzTimeLeft: "الوقت المتبقي", qzTimeNote: "وقت الكويز: {n} دقيقة. لما الوقت يخلص، إجاباتك بتتبعت لوحدها.", qzTimeUp: "الوقت خلص. إجاباتك اتبعتت.", err_no_link: "اكتب لينك صحيح يبدأ بـ https://",
+});
+
+const VERSION = "final version 21";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -166,6 +180,7 @@ const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, u
 S.adm = newAdm();
 S.pw = { old: "", new: "", err: "", busy: false };
 S.preview = false;
+S.theme = store.get("theme", "light") === "dark" ? "dark" : "light"; // the student's choice, kept on the device
 const t = (k) => T[S.lang][k];
 // small message pinned to the top of the screen; lives outside #app so re-renders don't remove it
 function toast(msg, ms) {
@@ -183,6 +198,8 @@ function toast(msg, ms) {
 }
 
 const P = {
+  moon: '<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
   book: '<path d="M4 4h7a3 3 0 013 3v13a2 2 0 00-2-2H4z"/><path d="M20 4h-6"/><path d="M20 4v14h-6"/>',
   cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
@@ -289,7 +306,7 @@ async function loadApiContent() {
     throw new Error("content");
   } catch { try { return { live: false, data: JSON.parse(store.get(cacheKey(), "")) }; } catch { return { live: false, data: null }; } }
 }
-const mapQuiz = (x, i) => ({ id: "", qid: x.id, native: true, clubs: parseClubs(x.club), type: "quiz", title: x.title, desc: "", lo: x.lo || "", url: "", date: parseDate(x.date), ds: x.date || "", grades: parseGrades(x.grade), attempts: +x.attempts || 0, count: x.count || 0, i: 40000 + i });
+const mapQuiz = (x, i) => ({ id: "", qid: x.id, native: true, clubs: parseClubs(x.club), type: "quiz", title: x.title, desc: "", lo: x.lo || "", url: "", date: parseDate(x.date), ds: x.date || "", grades: parseGrades(x.grade), attempts: +x.attempts || 0, minutes: +x.minutes || 0, count: x.count || 0, i: 40000 + i });
 const mapEv = (x) => ({ id: x.id || "", clubs: parseClubs(x.club), title: x.title, date: parseDate(x.date), ds: x.date || "", time: x.time, place: x.place, note: x.note, grades: parseGrades(x.grade) });
 async function loadAll() {
   // Content comes from the app's own sheets (via the API). The old published CSV sheets still load too
@@ -451,9 +468,13 @@ function langPicker() {
   const b = (code, label) => `<button data-act="setlang" data-v="${code}" class="${S.lang === code ? "on" : ""}" aria-pressed="${S.lang === code}">${label}</button>`;
   return `<div class="card" style="display:block;cursor:default"><b>${icon("globe", 18)} ${t("langTitle")}</b><div class="seg" dir="ltr" role="group" aria-label="${t("langTitle")}" style="margin-top:10px">${b("en", "English")}${b("ar", "العربية")}</div></div>`;
 }
+function themePicker() {
+  const b = (v, label) => `<button data-act="settheme" data-v="${v}" class="${S.theme === v ? "on" : ""}" aria-pressed="${S.theme === v}">${label}</button>`;
+  return `<div class="card" style="display:block;cursor:default"><b>${icon("moon", 18)} ${t("themeTitle")}</b><div class="seg" role="group" aria-label="${t("themeTitle")}" style="margin-top:10px">${b("light", t("themeLight"))}${b("dark", t("themeDark"))}</div></div>`;
+}
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${langPicker()}${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${langPicker()}${themePicker()}${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
   const reg = S.acct.mode === "register";
   return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
@@ -483,7 +504,7 @@ function openViewer(url, title) {
   closeViewer(true);
   const d = document.createElement("div");
   d.id = "viewer";
-  d.style.cssText = "position:fixed;inset:0;z-index:50;max-width:480px;margin:0 auto;background:#fff;display:flex;flex-direction:column";
+  d.style.cssText = "position:fixed;inset:0;z-index:50;max-width:var(--vw,480px);margin:0 auto;background:#fff;display:flex;flex-direction:column";
   const bs = "min-width:44px;height:44px;border:1px solid #E6E4EE;background:#fff;border-radius:12px;font-weight:600;font-size:14px;color:#1E1B2E;display:flex;align-items:center;justify-content:center;padding:0 12px;text-decoration:none;flex-shrink:0";
   d.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid #E6E4EE">
     <button data-vclose style="${bs}" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>
@@ -536,7 +557,7 @@ document.addEventListener("click", (e) => {
 });
 
 function resTile(r) {
-  if (r.native) return `<button class="card" data-qz="${esc(r.qid)}"><div class="ico">${icon("quiz")}</div><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc([r.lo, `${r.count} ${t("questionsWord")}`, r.attempts ? `${t("attemptsLbl")}: ${r.attempts}` : ""].filter(Boolean).join(" · "))}</span></div></button>`;
+  if (r.native) return `<button class="card" data-qz="${esc(r.qid)}"><div class="ico">${icon("quiz")}</div><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc([r.lo, `${r.count} ${t("questionsWord")}`, r.minutes ? `${r.minutes} ${t("minWord")}` : "", r.attempts ? `${t("attemptsLbl")}: ${r.attempts}` : ""].filter(Boolean).join(" · "))}</span></div></button>`;
   let url = r.url || "";
   if (r.type === "quiz" && NEEDS_USER.test(url)) {
     if (!CFG.API_URL) url = url.replace(FILL_USER, "");
@@ -577,15 +598,31 @@ const CHILD = ["references", "quizzes", "revision", "joint", "quiz"]; // pages o
 const OWN_PAGE = ["reference", "revision", "exam", "quiz"]; // these never appear in the Library (LOs) page
 
 // ---- screens ----
-function home() {
-  const evs = upcoming(S.events.filter((e) => inClub(e, S.club) && inGrade(e)));
-  const next = evs[0];
-  const when = next ? new Intl.DateTimeFormat(locale(), { weekday: "long", day: "numeric", month: "long" }).format(next.date) + [next.time && " · " + next.time, next.place && " · " + next.place].filter(Boolean).join("") : "";
-  const recent = recentFirst(gres().filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type))).slice(0, 3);
-  const tile = (ic, b, s, tab, f, wide) => `<button class="tile${wide ? " wide" : ""}" data-go="${tab}" data-filter="${f || "all"}">${icon(ic, 26)}<b>${t(b)}</b><span>${t(s)}</span></button>`;
-  return `<button class="hero herobtn" data-go="events"><small>${t("next")}</small><b dir="auto">${next ? esc(next.title) : t("noNext")}</b><span dir="auto">${esc(when)}</span><em class="hero-more">${t("events")} ${S.lang === "ar" ? "‹" : "›"}</em></button>
-  <div class="grid">${tile("book", "los", "losSub", "library")}${tile("reference", "refs", "refsSub", "references")}${tile("revision", "revision", "revisionSub", "revision")}${tile("quiz", "quizzes", "quizzesSub", "quizzes")}${tile("joint", "jointSpace", "jointSub", "joint", "all", true)}</div>
-  <h2>${t("recent")}</h2>${recent.map(resTile).join("") || empty()}`;
+function home(notices) {
+  const ci = clubInfo(S.club);
+  const next = upcoming(S.events.filter((e) => inClub(e, S.club) && inGrade(e)))[0];
+  const when = next ? [next.time, next.place].filter(Boolean).join(" · ") : "";
+  const mon = next ? new Intl.DateTimeFormat(locale(), { month: "short" }).format(next.date) : "";
+  const dayN = next ? new Intl.NumberFormat(locale()).format(next.date.getDate()) : "";
+  const recent = recentFirst(gres().filter((r) => ownOnly(r, S.club) && !OWN_PAGE.includes(r.type))).slice(0, 6);
+  const logoSrc = ci.logo || CFG.LOGOS?.[S.club];
+  const logo = logoSrc ? `<img src="${esc(logoSrc)}" alt="">` : `<span class="hh-gl" aria-hidden="true">${esc(ci.glyph || t(S.club).slice(0, 2))}</span>`;
+  const arrow = S.lang === "ar" ? "→" : "←";
+  const sc = (ic, label, tab, first) => `<button class="sc${first ? " first" : ""}" data-go="${tab}" data-filter="all"><span class="sc-c">${icon(ic, 26)}</span><span class="sc-l">${t(label)}</span></button>`;
+  return `<section class="hh">
+    <div class="hh-top"><button class="hh-btn" data-go="welcome" aria-label="${t("allClubs")}" title="${t("allClubs")}">${arrow}</button>
+      <span class="hh-act"><button class="hh-btn" data-act="theme" aria-label="${t("themeTitle")}">${icon(S.theme === "dark" ? "sun" : "moon", 20)}</button><button class="hh-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button></span></div>
+    <div class="hh-id">${logo}<div><h1 class="hh-title">${t(S.club)}</h1><div class="hh-sub">${t("app")}</div></div></div>
+    ${gradeBar()}
+  </section>
+  <button class="nextc" data-go="events" data-filter="all"><span class="nc-date">${next ? `<small>${esc(mon)}</small><b>${dayN}</b>` : icon("cal", 26)}</span>
+    <span class="nc-t"><span class="nc-l">${t("next")}</span><b dir="auto">${next ? esc(next.title) : t("noNext")}</b>${when ? `<span class="nc-w" dir="auto">${esc(when)}</span>` : ""}</span><span class="nc-chev" aria-hidden="true">${S.lang === "ar" ? "‹" : "›"}</span></button>
+  ${notices || ""}
+  <h2>${t("exploreT")}</h2>
+  <div class="scs">${sc("book", "los", "library", true)}${sc("reference", "refs", "references")}${sc("revision", "revision", "revision")}${sc("quiz", "quizzes", "quizzes")}${sc("joint", "joint", "joint")}</div>
+  <h2>${t("recent")}</h2>
+  ${recent.length ? `<div class="rail">${recent.map(resTile).join("")}</div>` : empty()}
+  <button class="jb" data-go="joint" data-filter="all">${icon("joint", 34)}<span class="grow"><b>${t("jointSpace")}</b><span>${t("jointSub")}</span></span></button>`;
 }
 function library() {
   const q = S.q.trim().toLowerCase();
@@ -663,7 +700,7 @@ function admOpen(kind, it, req) {
   A.form = it
     ? { clubs: it.clubs[0] === "*" ? ["all"] : [...it.clubs], title: it.title || "", date: it.ds || "", time: it.time || "", place: it.place || "", note: it.note || "", type: it.type || "file", description: it.desc || "", url: it.url || "", lo: it.lo || "", grades: gradesToForm(it.grades), reqnote: "" }
     : { clubs: def, title: "", date: "", time: "", place: "", note: "", type: "file", description: "", url: "", lo: "", grades: ["all"], reqnote: "" };
-  if (kind === "quiz") A.form = { clubs: def, title: "", lo: "", grades: ["all"], attempts: "0", questions: [newQ()] };
+  if (kind === "quiz") A.form = { clubs: def, title: "", lo: "", grades: ["all"], attempts: "0", minutes: "0", mode: "questions", url: "", questions: [newQ()] };
   render();
 }
 async function admEditQuiz(id) {
@@ -673,7 +710,7 @@ async function admEditQuiz(id) {
     if (r.ok) {
       const q = r.quiz, cl = parseClubs(q.club);
       A.kind = "quiz"; A.editId = q.id; A.req = false; A.err = "";
-      A.form = { clubs: cl[0] === "*" ? ["all"] : cl, title: q.title, lo: q.lo || "", grades: gradesToForm(parseGrades(q.grade)), attempts: String(q.attempts || 0), questions: q.questions.map((x) => ({ q: x.q, options: [...x.options], correct: x.correct, explain: x.explain || "" })) };
+      A.form = { clubs: cl[0] === "*" ? ["all"] : cl, title: q.title, lo: q.lo || "", grades: gradesToForm(parseGrades(q.grade)), attempts: String(q.attempts || 0), minutes: String(q.minutes || 0), mode: "questions", url: "", questions: q.questions.map((x) => ({ q: x.q, options: [...x.options], correct: x.correct, explain: x.explain || "" })) };
       render(); return;
     }
     if (r.error === "auth") { signOut(); return; }
@@ -713,12 +750,25 @@ async function admSaveQuiz() {
   if (!f || A.busy) return;
   A.err = "";
   if (!f.clubs.length) { A.err = t("err_invalid_club"); render(true); return; }
+  if (f.mode === "link") {
+    if (!f.title.trim()) { A.err = t("err_invalid_title"); render(true); return; }
+    if (!/^https:\/\/\S+$/i.test((f.url || "").trim())) { A.err = t("err_no_link"); render(true); return; }
+    A.busy = true; render(true);
+    try {
+      const r = await api("adminSave", { token: S.user.token, kind: "resource", item: { club: f.clubs.join("+"), type: "quiz", title: f.title, description: "", url: f.url.trim(), lo: f.lo, date: "", grade: gradeStr(f) } });
+      if (r.ok) { A.form = null; A.busy = false; toast(t("saved"), 2000); render(); loadAll(); return; }
+      if (r.error === "auth") { signOut(); return; }
+      if (r.error === "forbidden") refreshMe();
+      A.err = admErr(r);
+    } catch { A.err = t("err_generic"); }
+    A.busy = false; render(true); return;
+  }
   const okQ = f.questions.length && f.questions.every((q) => q.q.trim() && q.options.filter((o) => o.trim()).length >= 2 && q.options[q.correct]?.trim());
   if (!f.title.trim()) { A.err = t("err_invalid_title"); render(true); return; }
   if (!okQ) { A.err = t("err_invalid_questions"); render(true); return; }
   A.busy = true; render(true);
   try {
-    const r = await api("adminQuizSave", { token: S.user.token, id: A.editId || undefined, item: { club: f.clubs.join("+"), title: f.title, lo: f.lo, grade: gradeStr(f), attempts: +f.attempts || 0, questions: f.questions } });
+    const r = await api("adminQuizSave", { token: S.user.token, id: A.editId || undefined, item: { club: f.clubs.join("+"), title: f.title, lo: f.lo, grade: gradeStr(f), attempts: +f.attempts || 0, minutes: +f.minutes || 0, questions: f.questions } });
     if (r.ok) { A.form = null; A.busy = false; toast(t("saved"), 2000); render(); loadAll(); return; }
     if (r.error === "auth") { signOut(); return; }
     if (r.error === "forbidden") refreshMe();
@@ -907,10 +957,24 @@ function quizForm() {
     ${q.options.map((o, j) => `<div class="qrow"><input type="radio" name="qc-${i}" data-aq="correct" data-qi="${i}" value="${j}"${q.correct === j ? " checked" : ""} aria-label="${esc(t("correctMark"))}"><input class="qo" data-aq="opt" data-qi="${i}" data-oj="${j}" value="${esc(o)}" maxlength="150" dir="auto" placeholder="${esc(t("option"))} ${j + 1}">${q.options.length > 2 ? `<button type="button" class="mini" data-adm="opt-del" data-qi="${i}" data-oj="${j}" aria-label="${esc(t("del"))}">×</button>` : ""}</div>`).join("")}
     ${q.options.length < 6 ? `<button type="button" class="mini" data-adm="opt-add" data-qi="${i}">${t("addOption")}</button>` : ""}
     <input data-aq="explain" data-qi="${i}" value="${esc(q.explain)}" maxlength="300" dir="auto" placeholder="${esc(t("explainLbl"))}"></div>`).join("");
+  const link = f.mode === "link";
+  const modeSeg = A.editId ? "" : `<div class="seg" role="group" aria-label="${esc(t("fhQuiz"))}">${[["questions", "qzModeQ"], ["link", "qzModeLink"]].map(([m, k]) => `<button type="button" data-adm="qmode" data-v="${m}" class="${f.mode === m ? "on" : ""}" aria-pressed="${f.mode === m}">${t(k)}</button>`).join("")}</div>`;
+  const mins = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120]; if (!mins.includes(+f.minutes)) mins.push(+f.minutes);
+  const minSel = `<label for="af-minutes">${t("fMinutes")}</label><select id="af-minutes" data-af="minutes">${mins.sort((a, b) => a - b).map((m) => `<option value="${m}"${+f.minutes === m ? " selected" : ""}>${m ? `${m} ${t("minWord")}` : t("minNone")}</option>`).join("")}</select><p class="note" style="text-align:start;padding:0">${t("minutesHint")}</p>`;
+  if (link) return `<h2>${t("fhQuiz")}</h2>
+  <form id="adm-form" class="form">${modeSeg}<label>${t("fClubs")}</label><div class="checks">${boxes}</div><label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>
+    <label for="af-title">${t("fTitle")}</label><input id="af-title" data-af="title" value="${esc(f.title)}" required maxlength="120" dir="auto">
+    <label for="af-url">${t("fQuizLink")}</label><input id="af-url" data-af="url" type="url" value="${esc(f.url)}" dir="ltr" placeholder="https://forms.gle/…" required>
+    <p class="note" style="text-align:start;padding:0">${t("quizLinkHint")}</p>
+    <label for="af-lo">${t("fLo")}</label><input id="af-lo" data-af="lo" value="${esc(f.lo)}" maxlength="80" dir="auto">
+    ${A.err ? `<div class="warn" role="alert">${esc(A.err)}</div>` : ""}
+    <button class="btn" type="submit"${A.busy ? " disabled" : ""}>${A.busy ? t("saving") : t("save")}</button>
+    <button class="btn ghost" type="button" data-adm="cancel">${t("cancel")}</button></form>`;
   return `<h2>${t("fhQuiz")}</h2>
-  <form id="adm-form" class="form"><label>${t("fClubs")}</label><div class="checks">${boxes}</div><label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>
+  <form id="adm-form" class="form">${modeSeg}<label>${t("fClubs")}</label><div class="checks">${boxes}</div><label>${t("fGrades")}</label><div class="checks">${gradeBoxes(f)}</div>
     <label for="af-title">${t("fTitle")}</label><input id="af-title" data-af="title" value="${esc(f.title)}" required maxlength="120" dir="auto">
     <label for="af-lo">${t("fLo")}</label><input id="af-lo" data-af="lo" value="${esc(f.lo)}" maxlength="80" dir="auto">
+    ${minSel}
     <label for="af-attempts">${t("attemptsLbl")}</label><select id="af-attempts" data-af="attempts">${[["0", t("attemptsUnl")], ["1", "1"], ["2", "2"], ["3", "3"]].map(([v, l]) => `<option value="${v}"${String(f.attempts) === v ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
     ${qs}
     ${f.questions.length < 40 ? `<button type="button" class="btn ghost" data-adm="q-add" style="margin-top:0">${t("addQuestion")}</button>` : ""}
@@ -1024,20 +1088,21 @@ async function openQuiz(id) {
     const r = await api("quizGet", { token: S.user.token, id });
     if (S.qz !== Q) return;
     if (r.ok) {
-      Object.assign(Q, { title: r.quiz.title, questions: r.quiz.questions, attempts: r.quiz.attempts, used: r.quiz.used, answers: r.quiz.questions.map(() => -1) });
-      if (Q.attempts && Q.used >= Q.attempts) { Q.state = "error"; Q.err = t("err_attempts_done"); } else { Q.state = "ready"; qzMark(Q); }
+      Object.assign(Q, { title: r.quiz.title, questions: r.quiz.questions, attempts: r.quiz.attempts, used: r.quiz.used, minutes: +r.quiz.minutes || 0, answers: r.quiz.questions.map(() => -1) });
+      if (Q.attempts && Q.used >= Q.attempts) { Q.state = "error"; Q.err = t("err_attempts_done"); } else { Q.state = "ready"; Q.endAt = Q.minutes ? Date.now() + Q.minutes * 60000 : 0; qzMark(Q); }
     } else if (r.error === "auth") { signOut(); return; }
     else { Q.state = "error"; Q.err = t("qzLoadErr"); }
   } catch { Q.state = "error"; Q.err = t("err_generic"); }
   render();
 }
-async function submitQuiz() {
+const fmtClock = (ms) => { const sec = Math.ceil(ms / 1000), m = Math.floor(sec / 60), r = sec % 60; return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0"); };
+async function submitQuiz(timedOut) {
   const Q = S.qz;
-  if (!Q || Q.state !== "ready" || isAdmin() || Q.answers.some((a) => a < 0)) return;
+  if (!Q || Q.state !== "ready" || isAdmin() || (!timedOut && Q.answers.some((a) => a < 0))) return;
   Q.state = "submitting"; render(true);
   try {
-    const r = await api("quizSubmit", { token: S.user.token, id: Q.id, answers: Q.answers });
-    if (r.ok) { Q.result = r; Q.used += 1; Q.state = "result"; qzUnmark(); loadResults(); }
+    const r = await api("quizSubmit", { token: S.user.token, id: Q.id, answers: Q.answers, timedOut: !!timedOut });
+    if (r.ok) { Q.result = r; Q.used += 1; Q.state = "result"; qzUnmark(); loadResults(); if (timedOut) toast(t("qzTimeUp"), 4000); }
     else if (r.error === "auth") { signOut(); return; }
     else { Q.state = "error"; Q.err = admErr(r); qzUnmark(); }
   } catch { Q.state = "ready"; toast(t("err_generic"), 3000); } // network hiccup: let the student press submit again
@@ -1074,13 +1139,27 @@ function quizScreen() {
   const items = Q.questions.map((q, i) => `<div class="lo" style="padding:14px;display:flex;flex-direction:column;gap:8px"><b dir="auto" style="font-size:15px">${nf.format(i + 1)}. ${esc(q.q)}</b>
     ${q.options.map((o, j) => `<label class="opt"><input type="radio" name="qz${i}" data-qza="${i}" value="${j}"${Q.answers[i] === j ? " checked" : ""}><span dir="auto">${esc(o)}</span></label>`).join("")}</div>`).join("");
   const ready = Q.answers.every((a) => a >= 0);
-  return `<div class="hero"><small>${t("quizzes")}</small><b dir="auto">${esc(Q.title)}</b><span>${nf.format(Q.questions.length)} ${t("questionsWord")}${left ? " · " + esc(left) : ""}</span></div>
-    ${isAdmin() ? "" : `<div class="warn" role="note">${t("qzWarnNote")}</div>`}
+  const timed = Q.minutes > 0;
+  return `<div class="hero"><small>${t("quizzes")}</small><b dir="auto">${esc(Q.title)}</b><span>${nf.format(Q.questions.length)} ${t("questionsWord")}${timed ? " · " + nf.format(Q.minutes) + " " + t("minWord") : ""}${left ? " · " + esc(left) : ""}</span></div>
+    ${timed && Q.state === "ready" ? `<div class="qz-timer" id="qz-timer" role="timer" aria-label="${esc(t("qzTimeLeft"))}"><span>${t("qzTimeLeft")}</span><b dir="ltr" id="qz-time">${fmtClock(Math.max(0, (Q.endAt || Date.now()) - Date.now()))}</b></div>` : ""}
+    ${isAdmin() ? "" : `<div class="warn" role="note">${t("qzWarnNote")}${timed ? " " + t("qzTimeNote").replace("{n}", nf.format(Q.minutes)) : ""}</div>`}
     ${items}
     ${isAdmin() ? `<div class="warn" role="note">${t("previewQuizNote")}</div>` : ""}
     <p class="note" id="qz-hint"${ready ? " hidden" : ""}>${t("qzAnswerAll")}</p>
     <button class="btn" id="qz-submit" data-qzs${ready && Q.state === "ready" && !isAdmin() ? "" : " disabled"}>${Q.state === "submitting" ? t("saving") : t("qzSubmit")}</button>${back}`;
 }
+
+// timed quizzes: the clock runs on the phone; at zero the answers given so far are sent
+setInterval(() => {
+  const Q = S.qz;
+  if (!Q || Q.state !== "ready" || !Q.endAt) return;
+  const left = Q.endAt - Date.now();
+  const el = document.getElementById("qz-time");
+  if (el) el.textContent = fmtClock(Math.max(0, left));
+  const box = document.getElementById("qz-timer");
+  if (box) box.classList.toggle("low", left <= 60000);
+  if (left <= 0 && !isAdmin()) submitQuiz(true);
+}, 1000);
 
 // ---- quiz lock: leaving a quiz in progress cancels the attempt and the score is 0 ----
 // The server also treats any quiz that was opened but never submitted as 0 (quizGet starts the attempt),
@@ -1152,6 +1231,7 @@ document.addEventListener("click", (e) => {
   else if (d.adm === "cancel") { A.form = null; A.err = ""; A.req = false; render(); }
   else if (d.adm === "reply") admReply(d.id);
   else if (d.adm === "decide") admDecide(d.id, d.ok === "1");
+  else if (d.adm === "qmode") { A.form.mode = d.v === "link" ? "link" : "questions"; A.err = ""; render(true); }
   else if (d.adm === "q-add") { A.form.questions.push(newQ()); render(true); }
   else if (d.adm === "q-del") { A.form.questions.splice(qi, 1); render(true); }
   else if (d.adm === "opt-add") { A.form.questions[qi].options.push(""); render(true); }
@@ -1181,7 +1261,13 @@ document.addEventListener("change", (e) => {
   const el = e.target, A = S.adm, d = el.dataset || {};
   if (d.afc && A.form) {
     const c = d.afc, cur = A.form.clubs;
-    if (el.checked) { A.form.clubs = c === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), c]; if (c === "all" || cur.includes("all")) render(true); }
+    if (el.checked) {
+      A.form.clubs = c === "all" ? ["all"] : [...cur.filter((x) => x !== "all"), c];
+      // every club ticked (by the main admin) = "All clubs", the same way every grade ticked = "All grades"
+      const everyClub = isSuper() && !A.req && CLUB_LIST.every((x) => A.form.clubs.includes(x.id));
+      if (everyClub) A.form.clubs = ["all"];
+      if (c === "all" || cur.includes("all") || everyClub) render(true);
+    }
     else A.form.clubs = cur.filter((x) => x !== c);
     paintProg();
   } else if (d.abig && A.form) {
@@ -1225,7 +1311,7 @@ function welcomeHtml(vis) {
   const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
   const ext = (c) => `<a class="wc" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></a>`;
   const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
-  return `<div class="wel"><div class="wel-top"><span class="wel-brand">${t("app")}</span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button></span></div>
+  return `<div class="wel"><div class="wel-top"><span class="wel-brandrow"><img class="wel-logo" src="icons/club_logo.svg" alt=""><span class="wel-brand">${t("app")}</span></span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button></span></div>
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
     <p class="wel-pick">${t("welcomePick")}</p>
     <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div>
@@ -1260,8 +1346,8 @@ function render(keep) {
   const ci = clubInfo(S.club);
   const th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : !isAdmin() && ["account", "support"].includes(S.tab) ? APP_THEME : ci;
   root.style.setProperty("--accent", th.color); root.style.setProperty("--tint", th.tint || "#F1EBFC");
-  root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
-  document.querySelector('meta[name="theme-color"]').content = th.color;
+  root.dataset.theme = S.theme; root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
+  document.querySelector('meta[name="theme-color"]').content = S.theme === "dark" ? "#2B2657" : th.color;
   if (S.tab === "welcome") {
     document.querySelector('meta[name="theme-color"]').content = "#0B1026";
     document.getElementById("app").innerHTML = welcomeHtml(vis) + (isAdmin() ? navHtml() : "");
@@ -1283,10 +1369,11 @@ function render(keep) {
   const fm = document.getElementById("f-msg");
   if (fm) S.draft = fm.value;
   const keepFocusQ = document.activeElement?.id === "q";
-  app.innerHTML = `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
-    ${S.tab === "account" ? "" : `<button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button>`}${S.tab === "admin" || gate() ? `<button class="icon-btn" data-act="lang">${t("lang")}</button>` : ""}</div>
-  </header>
-  <main>${S.live ? "" : `<div class="warn">${t("offline")}</div>`}${previewBar()}${gradeBar()}${screens[S.tab]()}</main>
+  const notices = (S.live ? "" : `<div class="warn">${t("offline")}</div>`) + previewBar();
+  app.innerHTML = `${S.tab === "home" ? "" : `<header><div class="top">${back}${logo}<div class="t"><div class="title">${titles[S.tab]}</div><div class="sub">${subs[S.tab]}</div></div>
+    ${S.tab === "account" || gate() ? "" : `<button class="icon-btn" data-act="theme" aria-label="${t("themeTitle")}">${icon(S.theme === "dark" ? "sun" : "moon", 20)}</button>`}${S.tab === "account" ? "" : `<button class="icon-btn" data-act="refresh" aria-label="${t("refresh")}">↻</button>`}${S.tab === "admin" || gate() ? `<button class="icon-btn" data-act="lang">${t("lang")}</button>` : ""}</div>
+  </header>`}
+  <main data-tab="${S.tab}">${S.tab === "home" ? home(notices) : notices + gradeBar() + screens[S.tab]()}</main>
   ${navHtml()}`;
   if (prev) document.querySelector("main").scrollTop = prev;
   document.querySelector(".switch button.on")?.scrollIntoView({ inline: "center", block: "nearest" });
@@ -1330,6 +1417,8 @@ document.addEventListener("click", (e) => {
   else if (el.dataset.go) { S.supOk = false; S.supErr = ""; S.tab = el.dataset.go; S.filter = el.dataset.filter || "all"; S.q = ""; }
   else if (el.dataset.act === "setlang") { S.lang = el.dataset.v === "en" ? "en" : "ar"; store.set("lang", S.lang); }
   else if (el.dataset.act === "lang") { S.lang = S.lang === "ar" ? "en" : "ar"; store.set("lang", S.lang); }
+  else if (el.dataset.act === "settheme") { S.theme = el.dataset.v === "dark" ? "dark" : "light"; store.set("theme", S.theme); }
+  else if (el.dataset.act === "theme") { S.theme = S.theme === "dark" ? "light" : "dark"; store.set("theme", S.theme); }
   else if (el.dataset.act === "refresh") {
     toast(t("refreshing"), 0);
     Promise.allSettled([loadAll(), loadResults(), loadSupport(), refreshMe().then(loadAdminInbox)]).then(() => { render(true); toast(t("updated"), 2000); });
