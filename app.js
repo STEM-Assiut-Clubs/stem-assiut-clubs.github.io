@@ -146,7 +146,10 @@ Object.assign(T.ar, {
   qzTimeLeft: "الوقت المتبقي", qzTimeNote: "وقت الكويز: {n} دقيقة. لما الوقت يخلص، إجاباتك بتتبعت لوحدها.", qzTimeUp: "الوقت خلص. إجاباتك اتبعتت.", err_no_link: "اكتب لينك صحيح يبدأ بـ https://",
 });
 
-const VERSION = "final version 21";
+Object.assign(T.en, { viewerHint: "If the page stays blank, that website does not allow opening inside other apps. Tap \u201cOpen in browser\u201d." });
+Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
+
+const VERSION = "final version 22";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -495,6 +498,16 @@ function viewInfo(u) {
     return { embed: `https://docs.google.com/${m[1]}/d/${m[2]}/preview`, dl: m[1] === "presentation" ? `https://docs.google.com/presentation/d/${m[2]}/export/pdf` : `https://docs.google.com/${m[1]}/d/${m[2]}/export?format=pdf` };
   if ((m = u.match(/^https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?(?:[^#]*&)?v=([\w-]{11})/) || u.match(/^https?:\/\/youtu\.be\/([\w-]{11})/)))
     return { embed: `https://www.youtube.com/embed/${m[1]}`, dl: "" };
+  if ((m = u.match(/^https?:\/\/drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([\w-]+)/)))
+    return { embed: `https://drive.google.com/embeddedfolderview?id=${m[1]}#list`, dl: "" };
+  if ((m = u.match(/^https?:\/\/docs\.google\.com\/forms\/d\/(e\/[\w-]+)\/viewform/)))
+    return { embed: `https://docs.google.com/forms/d/${m[1]}/viewform?embedded=true`, dl: "" };
+  if ((m = u.match(/^https?:\/\/forms\.gle\/[\w-]+/)))
+    return { embed: u + (u.includes("?") ? "&" : "?") + "embedded=true", dl: "" };
+  if ((m = u.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)/)))
+    return { embed: `https://player.vimeo.com/video/${m[1]}`, dl: "" };
+  // any other web link opens inside the app too (the viewer has an "open in browser" button for sites that refuse to be shown inside another page)
+  if (/^https?:\/\//i.test(u)) return { embed: u, dl: "", generic: true };
   return null;
 }
 
@@ -510,7 +523,8 @@ function openViewer(url, title) {
     <button data-vclose style="${bs}" aria-label="${t("back")}">${S.lang === "ar" ? "→" : "←"}</button>
     <b dir="auto" style="flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(title)}</b>
     ${v.dl ? `<button data-vdl="${esc(v.dl)}" style="${bs};background:var(--accent);border-color:var(--accent);color:#fff">${t("download")}</button>` : `<a href="${esc(url)}" target="_blank" rel="noopener" style="${bs}">${t("openExt")}</a>`}</div>
-    <iframe src="${esc(v.embed)}" allow="autoplay; fullscreen" allowfullscreen style="flex:1;width:100%;border:0"></iframe>`;
+    ${v.generic ? `<div style="padding:8px 14px;font-size:12px;background:var(--surface,#fff);color:var(--muted,#5A576D);border-bottom:1px solid var(--line,#E6E4EE)">${t("viewerHint")}</div>` : ""}
+    <iframe src="${esc(v.embed)}" allow="autoplay; fullscreen; clipboard-write" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="flex:1;width:100%;border:0"></iframe>`;
   document.body.appendChild(d);
   history.pushState({ viewer: 1 }, "");
 }
@@ -565,7 +579,7 @@ function resTile(r) {
     else url = url.replace(FILL_USER, encodeURIComponent(S.user.username));
   }
   r = { ...r, url };
-  if (r.type !== "quiz" && viewInfo(url)) return `<button class="card" data-view="${esc(url)}" data-title="${esc(r.title)}"><div class="ico">${icon(r.type)}</div><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc(r.desc)}</span></div></button>`;
+  if (viewInfo(url)) return `<button class="card" data-view="${esc(url)}" data-title="${esc(r.title)}"><div class="ico">${icon(r.type)}</div><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc(r.desc)}</span></div></button>`;
   return `<a class="card" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener"><div class="ico">${icon(r.type)}</div><div class="grow"><b dir="auto">${esc(r.title)}</b><span dir="auto">${esc(r.desc)}</span></div></a>`;
 }
 function evTile(e) {
@@ -1309,7 +1323,7 @@ function gradeBar() {
 function welcomeHtml(vis) {
   const glyph = (c) => (c.logo || CFG.LOGOS?.[c.id]) ? `<img src="${esc(c.logo || CFG.LOGOS[c.id])}" alt="">` : `<span class="wg" style="background:${c.color}">${esc(c.glyph || t(c.id).slice(0, 2))}</span>`;
   const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
-  const ext = (c) => `<a class="wc" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></a>`;
+  const ext = (c) => `<button class="wc" data-view="${esc(safeUrl(c.url))}" data-title="${esc(t(c.id))}" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)} <span aria-hidden="true">↗</span></b><small>${t("extSite")}</small></button>`;
   const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
   return `<div class="wel"><div class="wel-top"><span class="wel-brandrow"><img class="wel-logo" src="icons/club_logo.svg" alt=""><span class="wel-brand">${t("app")}</span></span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button></span></div>
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
