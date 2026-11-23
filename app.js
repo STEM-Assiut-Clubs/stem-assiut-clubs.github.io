@@ -149,7 +149,7 @@ Object.assign(T.ar, {
 Object.assign(T.en, { viewerHint: "If the page stays blank, that website does not allow opening inside other apps. Tap \u201cOpen in browser\u201d." });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 22";
+const VERSION = "final version 23";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -683,6 +683,7 @@ const canManage = (x) => isAdmin() && (isSuper() || (x.clubs.length > 0 && !x.cl
 const clubName = (c) => (clubInfo(c) ? t(c) : c);
 // the admin area is coloured by who is signed in: a club's admin gets that club's colour, the main admin gets a colour no club uses
 const SUPER_THEME = { color: "#1E293B", tint: "#E7EBF2" };
+const SUPER_THEME_DARK = { color: "#6A60D0", tint: "#433D7E" }; // the near-black admin colour is too heavy on the soft dark background
 const adminTheme = () => (isSuper() ? SUPER_THEME : clubInfo(roleClubs()[0]) || SUPER_THEME);
 const APP_THEME = { color: "#2B1B6B", tint: "#ECE9F8" };
 const roleLabel = (r) => (!r ? t("student") : r.super ? t("roleSuper") : (r.clubs || []).map(clubName).join(" + ") || t("student"));
@@ -1358,7 +1359,8 @@ function render(keep) {
   const prev = keep ? document.querySelector("main")?.scrollTop : 0;
   const root = document.documentElement;
   const ci = clubInfo(S.club);
-  const th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : !isAdmin() && ["account", "support"].includes(S.tab) ? APP_THEME : ci;
+  let th = isAdmin() && !S.preview && ["admin", "account"].includes(S.tab) ? adminTheme() : !isAdmin() && ["account", "support"].includes(S.tab) ? APP_THEME : ci;
+  if ((th === SUPER_THEME || th === APP_THEME) && S.theme === "dark") th = SUPER_THEME_DARK;
   root.style.setProperty("--accent", th.color); root.style.setProperty("--tint", th.tint || "#F1EBFC");
   root.dataset.theme = S.theme; root.dataset.club = S.club; root.lang = S.lang; root.dir = S.lang === "ar" ? "rtl" : "ltr";
   document.querySelector('meta[name="theme-color"]').content = S.theme === "dark" ? "#2B2657" : th.color;
