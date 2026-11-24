@@ -416,3 +416,7 @@ nav button.on svg{transform:translateY(-2px) scale(1.12)}
 :root[data-theme="dark"] .inst-steps .n{background:var(--soft);color:var(--accent-fg)}
 :root[data-theme="dark"] .inst-grip{background:var(--line)}
 .inst-sheet .btn{display:block;width:100%;margin-top:20px}
+.emcard{margin:16px 0;padding:14px;border:1px solid #F0C36D;background:#FFF8E6;border-radius:16px;display:flex;flex-direction:column;gap:6px;color:#1b1936}
+.emcard b{font-size:15px}.emcard>span{font-size:13px;color:#5b5878}
+:root[data-theme="dark"] .emcard{background:color-mix(in srgb,#F0C36D 14%,var(--surface));border-color:#8A7440;color:var(--ink)}
+:root[data-theme="dark"] .emcard>span{color:var(--muted)}

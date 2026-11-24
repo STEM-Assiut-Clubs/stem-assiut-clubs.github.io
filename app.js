@@ -157,9 +157,17 @@ Object.assign(T.en, { instTitle: "Install the app on your phone", instSub: "Open
 Object.assign(T.ar, { instTitle: "ثبّت التطبيق على موبايلك", instSub: "يفتح أسرع، وبأيقونة على الشاشة، ومن غير متصفح", instBtn: "تثبيت", instRowTitle: "حمّل التطبيق", instRowSub: "ضيفه على شاشة موبايلك", instSheetTitle: "ثبّت نوادي STEM أسيوط", instPick: "اختار نوع موبايلك", instAndroid: "أندرويد", instIphone: "آيفون",
   instA1: "افتح الموقع في <b>Chrome</b>", instA2: "اضغط على النقط التلاتة <b>⋮</b> فوق على اليمين", instA3: "اختار <b>«تثبيت التطبيق»</b> أو «إضافة إلى الشاشة الرئيسية»", instA4: "هتلاقي الأيقونة على شاشتك وتفتحه زي أي تطبيق ✨",
   instI1: "افتح الموقع في <b>Safari</b> (مش Chrome)", instI2: "اضغط على زرار المشاركة <b>⎙</b> تحت", instI3: "انزل واضغط <b>«إضافة إلى الشاشة الرئيسية»</b>", instI4: "اضغط <b>إضافة</b> وبعدين افتح الأيقونة من شاشتك ✨", instOk: "تمام، فهمت", instClose: "إغلاق" });
+Object.assign(T.en, { email: "Personal email", emailConfirm: "Confirm email", emailNote: "We email you a code here if you forget your password. Type it carefully.", err_invalid_email: "That email doesn't look right.", err_email_mismatch: "The two emails don't match.",
+  forgotLink: "Forgot your password?", fpAdmin: "Can't get the code? Ask the main admin for a temporary password.", fpTitle: "Reset your password", fpIntro: "Type your username and we'll email you a 6-digit code.", fpSend: "Email me the code", fpSent: "We emailed a 6-digit code to", fpSpam: "Can't find it? Check Spam.", fpCode: "6-digit code", fpNewPw: "New password (6 or more characters)", fpReset: "Change my password", fpResend: "Send again", fpWait: "Wait a moment before asking again.", fpBack: "Back to sign in", fpDone: "Password changed ✓ Sign in with your new password.",
+  err_no_email: "No recovery email on that account. Ask the main admin to reset your password.", err_too_fast: "Too many requests. Try again in a while.", err_mail_quota: "Emails are paused for today. Ask the main admin.", err_mail_failed: "Couldn't send the email. Check the address or ask the main admin.", err_bad_code: "That code is wrong.", err_code_expired: "That code expired. Ask for a new one.",
+  emAddTitle: "Add your recovery email", emAddSub: "So you can reset your password by yourself if you forget it.", emHave: "Recovery email", emChange: "Change", emSave: "Save email", emSaved: "Email saved ✓", emPw: "Your current password" });
+Object.assign(T.ar, { email: "الإيميل الشخصي", emailConfirm: "تأكيد الإيميل", emailNote: "هنبعتلك عليه كود لو نسيت كلمة السر. اكتبه صح.", err_invalid_email: "الإيميل مش مظبوط.", err_email_mismatch: "الإيميلين مش زي بعض.",
+  forgotLink: "نسيت كلمة السر؟", fpAdmin: "الكود مش بيوصل؟ اطلب من الأدمن كلمة سر مؤقتة.", fpTitle: "استرجاع كلمة السر", fpIntro: "اكتب اسم المستخدم وهنبعتلك كود من ٦ أرقام على الإيميل.", fpSend: "ابعتلي الكود", fpSent: "بعتنا كود من ٦ أرقام على", fpSpam: "مش لاقيه؟ شوف الـ Spam.", fpCode: "الكود (٦ أرقام)", fpNewPw: "كلمة السر الجديدة (٦ حروف أو أكتر)", fpReset: "غيّر كلمة السر", fpResend: "ابعت تاني", fpWait: "استنى شوية قبل ما تطلب تاني.", fpBack: "رجوع لتسجيل الدخول", fpDone: "اتغيّرت كلمة السر ✓ سجّل دخولك بالجديدة.",
+  err_no_email: "مفيش إيميل استرجاع على الحساب ده. اطلب من الأدمن يعيد ضبط كلمة السر.", err_too_fast: "طلبات كتير. جرّب بعد شوية.", err_mail_quota: "الإيميلات واقفة النهارده. كلّم الأدمن.", err_mail_failed: "معرفناش نبعت الإيميل. راجع العنوان أو كلّم الأدمن.", err_bad_code: "الكود غلط.", err_code_expired: "الكود انتهى. اطلب كود جديد.",
+  emAddTitle: "ضيف إيميل الاسترجاع", emAddSub: "عشان تقدر تسترجع كلمة السر لوحدك لو نسيتها.", emHave: "إيميل الاسترجاع", emChange: "تغيير", emSave: "احفظ الإيميل", emSaved: "اتحفظ الإيميل ✓", emPw: "كلمة السر الحالية" });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 30";
+const VERSION = "final version 31";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -390,12 +398,14 @@ async function loadResults() {
 async function submitAccount(form) {
   const v = Object.fromEntries(new FormData(form));
   const reg = S.acct.mode === "register";
-  S.form = { ...S.form, username: v.username, name: v.name, grade: v.grade || S.form.grade };
+  S.form = { ...S.form, username: v.username, name: v.name, grade: v.grade || S.form.grade, email: v.email, email2: v.email2 };
+  S.acct.ok = "";
+  if (reg && String(v.email || "").trim().toLowerCase() !== String(v.email2 || "").trim().toLowerCase()) { S.acct.err = t("err_email_mismatch"); render(); return; }
   const btn = form.querySelector("button[type=submit]");
   btn.disabled = true; btn.textContent = t("pleaseWait");
   try {
-    const r = await api(reg ? "register" : "login", { username: v.username, name: v.name, password: v.password, ...(reg ? { grade: v.grade } : {}) });
-    if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null, temp: !!r.mustChange }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "welcome"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
+    const r = await api(reg ? "register" : "login", { username: v.username, name: v.name, password: v.password, ...(reg ? { grade: v.grade, email: v.email, email2: v.email2 } : {}) });
+    if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null, temp: !!r.mustChange, email: r.email || "" }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "welcome"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
     S.acct.err = T[S.lang]["err_" + r.error] || t("err_generic");
   } catch { S.acct.err = t("err_generic"); }
   render();
@@ -465,6 +475,74 @@ function supportScreen() {
     <button class="btn" type="submit"${S.sending ? " disabled" : ""}>${S.sending ? t("sending") : t("send")}</button></form>
   <h2>${t("myQuestions")}</h2>${list}`;
 }
+// ---- forgot password (email code) ----
+S.fp = { step: 1, username: "", masked: "", err: "", busy: false, nextAt: 0 };
+function forgotScreen() {
+  const F = S.fp;
+  const back = `<button class="linkbtn" data-fp="back">← ${t("fpBack")}</button>`;
+  const err = F.err ? `<div class="warn" role="alert">${esc(F.err)}</div>` : "";
+  if (F.step === 1) return `<p class="note" style="text-align:start">${back}</p><h2>${t("fpTitle")}</h2><form id="fp1-form" class="form"><p class="note" style="text-align:start;padding:0">${t("fpIntro")}</p>
+    <label for="fp-user">${t("username")}</label><input id="fp-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" required value="${esc(F.username)}">
+    ${err}<button class="btn" type="submit"${F.busy ? " disabled" : ""}>${F.busy ? t("pleaseWait") : t("fpSend")}</button></form><p class="note">${t("fpAdmin")}</p>`;
+  return `<p class="note" style="text-align:start">${back}</p><h2>${t("fpTitle")}</h2><form id="fp2-form" class="form">
+    <div class="warn" role="status" style="background:#E8F6EC;border-color:#9AD3AB;color:#14532D">✓ ${t("fpSent")} <b dir="ltr">${esc(F.masked)}</b><br><small>${t("fpSpam")}</small></div>
+    <label for="fp-code">${t("fpCode")}</label><input id="fp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" dir="ltr" required style="letter-spacing:.3em;font-size:22px;font-weight:700;text-align:center">
+    <label for="fp-new">${t("fpNewPw")}</label><input id="fp-new" name="newPassword" type="password" autocomplete="new-password" minlength="6" maxlength="64" required>
+    ${err}<button class="btn" type="submit"${F.busy ? " disabled" : ""}>${F.busy ? t("pleaseWait") : t("fpReset")}</button></form>
+    <p class="note"><button class="linkbtn" data-fp="resend">${t("fpResend")}</button></p><p class="note">${t("fpAdmin")}</p>`;
+}
+async function fpRequest(username) {
+  const F = S.fp;
+  F.busy = true; F.err = ""; F.username = username; render();
+  try {
+    const r = await api("forgotRequest", { username });
+    if (r.ok) { F.step = 2; F.masked = r.email || ""; F.nextAt = Date.now() + 30000; }
+    else F.err = T[S.lang]["err_" + r.error] || t("err_generic");
+  } catch { F.err = t("err_generic"); }
+  F.busy = false; render();
+}
+async function fpReset(form) {
+  const F = S.fp, v = Object.fromEntries(new FormData(form));
+  F.busy = true; F.err = ""; render();
+  try {
+    const r = await api("forgotReset", { username: F.username, code: v.code, newPassword: v.newPassword });
+    if (r.ok) { S.form = { ...S.form, username: F.username }; S.acct = { mode: "login", err: "", ok: t("fpDone") }; S.fp = { step: 1, username: "", masked: "", err: "", busy: false, nextAt: 0 }; render(); return; }
+    F.err = T[S.lang]["err_" + r.error] || t("err_generic");
+  } catch { F.err = t("err_generic"); }
+  F.busy = false; render();
+}
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-fp]");
+  if (!el) return;
+  const v = el.dataset.fp;
+  if (v === "start") { S.fp = { step: 1, username: S.form.username || "", masked: "", err: "", busy: false, nextAt: 0 }; S.acct.mode = "forgot"; S.acct.err = ""; render(); }
+  else if (v === "back") { S.acct.mode = "login"; render(); }
+  else if (v === "resend") { if (Date.now() < S.fp.nextAt) { toast(t("fpWait"), 2000); return; } fpRequest(S.fp.username); }
+});
+// ---- recovery email (Profile) ----
+function emailCard() {
+  if (!S.user) return "";
+  const have = !!S.user.email, E = S.em || (S.em = { err: "", busy: false });
+  const form = `<form id="em-form" class="form">
+    <label for="em-1">${t("email")}</label><input id="em-1" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" dir="ltr" required>
+    <label for="em-2">${t("emailConfirm")}</label><input id="em-2" name="email2" type="email" inputmode="email" autocomplete="off" autocapitalize="none" dir="ltr" required>
+    <label for="em-pw">${t("emPw")}</label><input id="em-pw" name="password" type="password" autocomplete="current-password" required>
+    ${E.err ? `<div class="warn" role="alert">${esc(E.err)}</div>` : ""}<button class="btn" type="submit"${E.busy ? " disabled" : ""}>${t("emSave")}</button></form>`;
+  if (!have) return `<div class="emcard"><b>🔑 ${t("emAddTitle")}</b><span>${t("emAddSub")}</span>${form}</div>`;
+  return `<details class="del"><summary style="color:inherit">${t("emHave")}: <span dir="ltr">${esc(S.user.email)}</span> ✓ · ${t("emChange")}</summary>${form}</details>`;
+}
+async function saveEmail(form) {
+  const E = S.em || (S.em = { err: "", busy: false }), v = Object.fromEntries(new FormData(form));
+  if (String(v.email).trim().toLowerCase() !== String(v.email2).trim().toLowerCase()) { E.err = t("err_email_mismatch"); render(); return; }
+  E.busy = true; E.err = ""; render();
+  try {
+    const r = await api("setEmail", { token: S.user.token, email: v.email, email2: v.email2, password: v.password });
+    if (r.ok) { setUser({ ...S.user, email: r.email }); E.busy = false; E.err = ""; toast(t("emSaved"), 2000); render(); return; }
+    if (r.error === "auth") { signOut(); return; }
+    E.err = T[S.lang]["err_" + r.error] || t("err_generic");
+  } catch { E.err = t("err_generic"); }
+  E.busy = false; render();
+}
 const privacyLink = () => `<p class="note"><button class="linkbtn" data-view="${esc(new URL("privacy.html", location.href).href)}" data-title="${esc(t("privacy"))}">${t("privacy")}</button></p>`;
 function delForm() {
   return `<details class="del"><summary>${t("delTitle")}</summary><form id="del-form" class="form"><p class="note" style="text-align:start;padding:0">${t("delNote")}</p>
@@ -518,17 +596,21 @@ function themePicker() {
 }
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${installRow()}${langPicker()}${themePicker()}${pwForm(false)}${isSuper() ? "" : delForm()}<p class="note">${t("accountNote")}</p>${privacyLink()}<button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${emailCard()}${installRow()}${langPicker()}${themePicker()}${pwForm(false)}${isSuper() ? "" : delForm()}<p class="note">${t("accountNote")}</p>${privacyLink()}<button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  if (S.acct.mode === "forgot") return forgotScreen();
   const reg = S.acct.mode === "register";
-  return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
+  return `${S.acct.ok ? `<div class="warn" role="status" style="background:#E8F6EC;border-color:#9AD3AB;color:#14532D">${esc(S.acct.ok)}</div>` : ""}${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
     <label for="f-user">${t("username")}</label><input id="f-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" required value="${esc(S.form.username || "")}">
     ${reg ? `<label for="f-name">${t("fullName")}</label><input id="f-name" name="name" autocomplete="name" required value="${esc(S.form.name || "")}">` : ""}
+    ${reg ? `<label for="f-email">${t("email")}</label><input id="f-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" dir="ltr" required value="${esc(S.form.email || "")}">
+    <label for="f-email2">${t("emailConfirm")}</label><input id="f-email2" name="email2" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" dir="ltr" required value="${esc(S.form.email2 || "")}">
+    <p class="note" style="text-align:start;padding:0;margin:-2px 0 0">${t("emailNote")}</p>` : ""}
     ${reg ? `<label>${t("regGrade")}</label><div class="checks" role="radiogroup">${GRADES.map((g) => `<label class="chk"><input type="radio" name="grade" value="${esc(g)}" required${S.form.grade === g ? " checked" : ""}>${esc(gradeName(g))}</label>`).join("")}</div>` : ""}
     <label for="f-pass">${t("password")}</label><input id="f-pass" name="password" type="password" autocomplete="${reg ? "new-password" : "current-password"}" minlength="6" required>
     ${S.acct.err ? `<div class="warn" role="alert">${esc(S.acct.err)}</div>` : ""}
     <button class="btn" type="submit">${reg ? t("createAccount") : t("signIn")}</button>
-  </form>${reg ? "" : `<p class="note">${t("forgotHint")}</p>`}<p class="note">${t("accountNote")}</p>${privacyLink()}<p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  </form>${reg ? "" : `<p class="note"><button class="linkbtn" data-fp="start">${t("forgotLink")}</button></p><p class="note">${t("fpAdmin")}</p>`}<p class="note">${t("accountNote")}</p>${privacyLink()}<p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
 }
 
 // Opens Google Drive / Docs / YouTube links inside the app instead of leaving it
@@ -747,7 +829,7 @@ async function refreshMe() {
     const r = await api("me", { token: S.user.token });
     if (r.ok) {
       const before = JSON.stringify(S.user.role);
-      setUser({ ...S.user, name: r.name, role: r.role || null, temp: !!r.mustChange });
+      setUser({ ...S.user, name: r.name, role: r.role || null, temp: !!r.mustChange, email: r.email || "" });
       if (before !== JSON.stringify(S.user.role)) await loadAll(); else render(true);
     } else if (r.error === "auth") signOut();
   } catch {}
@@ -1574,6 +1656,9 @@ document.addEventListener("click", (e) => {
 document.addEventListener("input", (e) => { if (e.target.id === "q") { S.q = e.target.value; render(true); } });
 document.addEventListener("submit", (e) => {
   if (e.target.id === "acct-form") { e.preventDefault(); submitAccount(e.target); }
+  if (e.target.id === "fp1-form") { e.preventDefault(); fpRequest(String(new FormData(e.target).get("username") || "").trim().toLowerCase()); }
+  if (e.target.id === "fp2-form") { e.preventDefault(); fpReset(e.target); }
+  if (e.target.id === "em-form") { e.preventDefault(); saveEmail(e.target); }
   if (e.target.id === "del-form") { e.preventDefault(); deleteAccount(e.target); }
   if (e.target.id === "sup-form") { e.preventDefault(); submitSupport(e.target); }
 });
