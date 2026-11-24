@@ -147,9 +147,11 @@ Object.assign(T.ar, {
 });
 
 Object.assign(T.en, { viewerHint: "If the page stays blank, that website does not allow opening inside other apps. Tap \u201cOpen in browser\u201d." });
+Object.assign(T.en, { regGrade: "Your grade", tAdmins: "Admins", tNoGrade: "No grade", setGrade: "Grade", err_invalid_grade: "Please choose your grade." });
+Object.assign(T.ar, { regGrade: "إنت في أنهي صف؟", tAdmins: "الأدمن", tNoGrade: "من غير صف", setGrade: "الصف", err_invalid_grade: "اختار الصف بتاعك." });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 25";
+const VERSION = "final version 26";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -178,7 +180,7 @@ const visibleIds = () => {
 const visClubs = () => CLUB_LIST.filter((c) => visibleIds().includes(c.id));
 const gate = () => (!CFG.API_URL ? "" : !S.user ? "login" : S.user.temp ? "password" : "");
 const seesItem = (x) => !CFG.API_URL || S.user?.role?.super || x.clubs.includes("*") || x.clubs.some((c) => visibleIds().includes(c));
-const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", prog: null, big: false, reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, drafts: {}, roleEdit: null });
+const newAdm = () => ({ pwShown: null, sec: "content", form: null, req: false, uploading: "", prog: null, big: false, reqs: [], qres: null, kind: "", editId: "", busy: false, err: "", inbox: { state: "idle", list: [] }, users: { state: "idle", list: [] }, tsec: "admins", drafts: {}, roleEdit: null });
 S.adm = newAdm();
 S.pw = { old: "", new: "", err: "", busy: false };
 S.preview = false;
@@ -368,11 +370,11 @@ async function loadResults() {
 async function submitAccount(form) {
   const v = Object.fromEntries(new FormData(form));
   const reg = S.acct.mode === "register";
-  S.form = { ...S.form, username: v.username, name: v.name };
+  S.form = { ...S.form, username: v.username, name: v.name, grade: v.grade || S.form.grade };
   const btn = form.querySelector("button[type=submit]");
   btn.disabled = true; btn.textContent = t("pleaseWait");
   try {
-    const r = await api(reg ? "register" : "login", { username: v.username, name: v.name, password: v.password });
+    const r = await api(reg ? "register" : "login", { username: v.username, name: v.name, password: v.password, ...(reg ? { grade: v.grade } : {}) });
     if (r.ok) { setUser({ username: r.username, name: r.name, token: r.token, role: r.role || null, temp: !!r.mustChange }); S.acct.err = ""; S.form = {}; S.tab = isAdmin() ? "admin" : "welcome"; render(); loadAll(); loadResults(); loadSupport(); refreshMe().then(loadAdminInbox); return; }
     S.acct.err = T[S.lang]["err_" + r.error] || t("err_generic");
   } catch { S.acct.err = t("err_generic"); }
@@ -485,6 +487,7 @@ function accountScreen() {
   <form id="acct-form" class="form">
     <label for="f-user">${t("username")}</label><input id="f-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" required value="${esc(S.form.username || "")}">
     ${reg ? `<label for="f-name">${t("fullName")}</label><input id="f-name" name="name" autocomplete="name" required value="${esc(S.form.name || "")}">` : ""}
+    ${reg ? `<label>${t("regGrade")}</label><div class="checks" role="radiogroup">${GRADES.map((g) => `<label class="chk"><input type="radio" name="grade" value="${esc(g)}" required${S.form.grade === g ? " checked" : ""}>${esc(gradeName(g))}</label>`).join("")}</div>` : ""}
     <label for="f-pass">${t("password")}</label><input id="f-pass" name="password" type="password" autocomplete="${reg ? "new-password" : "current-password"}" minlength="6" required>
     ${S.acct.err ? `<div class="warn" role="alert">${esc(S.acct.err)}</div>` : ""}
     <button class="btn" type="submit">${reg ? t("createAccount") : t("signIn")}</button>
@@ -1066,8 +1069,14 @@ function admTeam() {
   if ((U.state === "loading" || U.state === "idle") && !U.list.length) return `<p class="note">${t("loadingRes")}</p>`;
   if (U.state === "error") return `<div class="warn">${t("supportErr")}</div>`;
   const q = S.q.trim().toLowerCase();
-  const list = U.list.filter((u) => !q || u.username.includes(q) || u.name.toLowerCase().includes(q))
-    .sort((a, b) => (!a.role - !b.role) || a.name.localeCompare(b.name)).slice(0, 60);
+  const isAdm = (u) => !!parseRoleStr(u.role).super || parseRoleStr(u.role).clubs.length > 0;
+  const groups = { admins: (u) => isAdm(u), ...Object.fromEntries(GRADES.map((g) => [g, (u) => !isAdm(u) && u.grade === g])), none: (u) => !isAdm(u) && !GRADES.includes(u.grade) };
+  const countOf = (k) => U.list.filter(groups[k]).length;
+  const keys = ["admins", ...GRADES, ...(countOf("none") ? ["none"] : [])];
+  if (!keys.includes(A.tsec)) A.tsec = "admins";
+  const tabs = `<div class="seg" role="group">${keys.map((k) => `<button data-adm="tsec" data-v="${k}" class="${A.tsec === k ? "on" : ""}">${k === "admins" ? t("tAdmins") : k === "none" ? t("tNoGrade") : gradeName(k)} (${countOf(k)})</button>`).join("")}</div>`;
+  const list = U.list.filter(groups[A.tsec]).filter((u) => !q || u.username.includes(q) || u.name.toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name)).slice(0, 200);
   const tile = (u) => {
     const e = A.roleEdit;
     if (e && e.username === u.username) {
@@ -1078,12 +1087,13 @@ function admTeam() {
         <div class="row-actions"><button class="mini primary" data-adm="role-save">${t("save")}</button><button class="mini" data-adm="role-cancel">${t("cancel")}</button></div></div>`;
     }
     const r = parseRoleStr(u.role), isMe = u.username === S.user.username;
-    return `<div class="card" style="flex-wrap:wrap"><div class="grow"><b dir="auto">${esc(u.name)}</b><span dir="ltr">@${esc(u.username)}</span></div>
+    return `<div class="card" style="flex-wrap:wrap"><div class="grow" style="flex:1 1 150px"><b dir="auto">${esc(u.name)}</b><span dir="ltr">@${esc(u.username)}</span></div>
       <span class="badge">${esc(r.super || r.clubs.length ? roleLabel(r) : t("student"))}</span>
+      ${r.super || r.clubs.length ? "" : `<select data-ugrade="${esc(u.username)}" aria-label="${esc(t("setGrade"))}" style="min-height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:0 8px"><option value=""${GRADES.includes(u.grade) ? "" : " selected"}>${esc(t("tNoGrade"))}</option>${GRADES.map((g) => `<option value="${esc(g)}"${u.grade === g ? " selected" : ""}>${esc(gradeName(g))}</option>`).join("")}</select>`}
       ${isMe ? "" : `<button class="mini" data-adm="role-edit" data-u="${esc(u.username)}">${t("changeRole")}</button><button class="mini" data-adm="pw-reset" data-u="${esc(u.username)}">${t("resetPw")}</button>${/(^|\+)super$/.test(u.role || "") ? "" : `<button class="mini danger" data-adm="user-del" data-u="${esc(u.username)}">${t("deleteAcct")}</button>`}`}</div>`;
   };
   const shown = A.pwShown ? `<div class="hero"><small>${t("tempPwTitle")} @${esc(A.pwShown.username)}</small><b dir="ltr" style="font-size:28px;letter-spacing:.14em;user-select:all">${esc(A.pwShown.password)}</b><span>${t("tempPwNote")}</span></div><div class="row-actions"><button class="mini primary" data-adm="pw-copy">${t("copy")}</button><button class="mini" data-adm="pw-close">${t("close")}</button></div>` : "";
-  return `${shown}<input id="q" type="search" placeholder="${esc(t("searchUsers"))}" value="${esc(S.q)}" dir="auto">${list.map(tile).join("") || `<p class="note">${t("empty")}</p>`}`;
+  return `${shown}${tabs}<input id="q" type="search" placeholder="${esc(t("searchUsers"))}" value="${esc(S.q)}" dir="auto">${list.map(tile).join("") || `<p class="note">${t("empty")}</p>`}`;
 }
 function adminScreen() {
   if (!isAdmin()) return `<p class="note">${t("noAccess")}</p>`;
@@ -1241,6 +1251,7 @@ document.addEventListener("click", (e) => {
   if (d.qz) { openQuiz(d.qz); return; }
   if (el.hasAttribute("data-qzs")) { submitQuiz(); return; }
   const qi = +d.qi, oj = +d.oj;
+  if (d.adm === "tsec") { A.tsec = d.v; S.q = ""; A.roleEdit = null; render(); return; }
   if (d.adm === "sec") { A.sec = d.v; S.q = ""; A.roleEdit = null; render(); if (d.v === "inbox" || d.v === "requests") loadAdminInbox(); if (d.v === "team") loadUsers(); }
   else if (d.adm === "add") admOpen(d.kind, null, d.req === "1");
   else if (d.adm === "edit") { const it = (d.kind === "event" ? S.events : S.resources).find((x) => x.id === d.id); if (it) admOpen(d.kind, it, false); }
@@ -1277,8 +1288,17 @@ document.addEventListener("input", (e) => {
     else if (d.aq === "correct" && el.checked) q.correct = +el.value;
   }
 });
-document.addEventListener("change", (e) => {
+document.addEventListener("change", async (e) => {
   const el = e.target, A = S.adm, d = el.dataset || {};
+  if (d.ugrade !== undefined && isSuper()) {
+    const prev = (A.users.list.find((u) => u.username === d.ugrade) || {}).grade || "";
+    try {
+      const r = await api("adminSetGrade", { token: S.user.token, username: d.ugrade, grade: el.value });
+      if (r.ok) { A.users.list = A.users.list.map((u) => (u.username === d.ugrade ? { ...u, grade: r.grade || "" } : u)); render(true); toast(t("updated"), 1500); return; }
+      el.value = prev; toast(admErr(r), 3000);
+    } catch { el.value = prev; toast(t("err_generic"), 3000); }
+    return;
+  }
   if (d.afc && A.form) {
     const c = d.afc, cur = A.form.clubs;
     if (el.checked) {
