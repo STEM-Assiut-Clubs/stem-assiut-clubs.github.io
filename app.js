@@ -151,9 +151,15 @@ Object.assign(T.en, { regGrade: "Your grade", tAdmins: "Admins", tNoGrade: "No g
 Object.assign(T.ar, { regGrade: "إنت في أنهي صف؟", tAdmins: "الأدمن", tNoGrade: "من غير صف", setGrade: "الصف", err_invalid_grade: "اختار الصف بتاعك." });
 Object.assign(T.en, { privacy: "Privacy policy", delTitle: "Delete my account", delNote: "This permanently deletes your account, quiz results and messages. It can't be undone.", delBtn: "Delete my account", delConfirm: "Delete your account and all your data for good?", delPw: "Your password" });
 Object.assign(T.ar, { privacy: "سياسة الخصوصية", delTitle: "حذف حسابي", delNote: "ده بيمسح حسابك ونتايج الكويزات والرسايل نهائيًا، ومينفعش يتراجع.", delBtn: "احذف حسابي", delConfirm: "تحذف حسابك وكل بياناتك نهائيًا؟", delPw: "كلمة السر" });
+Object.assign(T.en, { instTitle: "Install the app on your phone", instSub: "Opens faster, with an icon on your screen and no browser bar", instBtn: "Install", instRowTitle: "Get the app", instRowSub: "Add it to your phone's screen", instSheetTitle: "Install STEM Assiut Clubs", instPick: "Pick your phone", instAndroid: "Android", instIphone: "iPhone",
+  instA1: "Open the site in <b>Chrome</b>", instA2: "Tap the three dots <b>⋮</b> at the top right", instA3: "Choose <b>“Install app”</b> or “Add to Home screen”", instA4: "Find the icon on your screen and open it like any app ✨",
+  instI1: "Open the site in <b>Safari</b> (not Chrome)", instI2: "Tap the <b>Share</b> button <b>⎙</b> at the bottom", instI3: "Scroll down and tap <b>“Add to Home Screen”</b>", instI4: "Tap <b>Add</b>, then open the icon from your screen ✨", instOk: "Got it", instClose: "Close" });
+Object.assign(T.ar, { instTitle: "ثبّت التطبيق على موبايلك", instSub: "يفتح أسرع، وبأيقونة على الشاشة، ومن غير متصفح", instBtn: "تثبيت", instRowTitle: "حمّل التطبيق", instRowSub: "ضيفه على شاشة موبايلك", instSheetTitle: "ثبّت نوادي STEM أسيوط", instPick: "اختار نوع موبايلك", instAndroid: "أندرويد", instIphone: "آيفون",
+  instA1: "افتح الموقع في <b>Chrome</b>", instA2: "اضغط على النقط التلاتة <b>⋮</b> فوق على اليمين", instA3: "اختار <b>«تثبيت التطبيق»</b> أو «إضافة إلى الشاشة الرئيسية»", instA4: "هتلاقي الأيقونة على شاشتك وتفتحه زي أي تطبيق ✨",
+  instI1: "افتح الموقع في <b>Safari</b> (مش Chrome)", instI2: "اضغط على زرار المشاركة <b>⎙</b> تحت", instI3: "انزل واضغط <b>«إضافة إلى الشاشة الرئيسية»</b>", instI4: "اضغط <b>إضافة</b> وبعدين افتح الأيقونة من شاشتك ✨", instOk: "تمام، فهمت", instClose: "إغلاق" });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 29";
+const VERSION = "final version 30";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -512,7 +518,7 @@ function themePicker() {
 }
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${langPicker()}${themePicker()}${pwForm(false)}${isSuper() ? "" : delForm()}<p class="note">${t("accountNote")}</p>${privacyLink()}<button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${installRow()}${langPicker()}${themePicker()}${pwForm(false)}${isSuper() ? "" : delForm()}<p class="note">${t("accountNote")}</p>${privacyLink()}<button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
   const reg = S.acct.mode === "register";
   return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
@@ -1377,6 +1383,49 @@ function gradeBar() {
   const opts = GRADES.map((g) => [g, gradeName(g)]); // one tab per grade, no "all grades" tab
   return `<div class="seg grades" role="group" aria-label="${esc(t("gradeWord"))}">${opts.map(([k, l]) => `<button data-grade="${esc(k)}" class="${S.grade === k ? "on" : ""}" aria-pressed="${S.grade === k}">${esc(l)}</button>`).join("")}</div>`;
 }
+// ---- install as an app (Add to Home screen) ----
+let deferredInstall = null;
+const isInstalled = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true || store.get("installed", "") === "1";
+const isPhoneish = () => matchMedia("(max-width: 899px)").matches;
+const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; });
+window.addEventListener("appinstalled", () => { store.set("installed", "1"); deferredInstall = null; closeInstall(); render(true); });
+const instIcon = '<img src="icons/app-icon-192.png" alt="">';
+const installBanner = () => (isInstalled() || !isPhoneish() || store.get("instDismissed", "") === "1" ? "" :
+  `<div class="inst">${instIcon}<div class="inst-t"><b>${t("instTitle")}</b><span>${t("instSub")}</span></div><button class="inst-go" data-inst="go">${t("instBtn")}</button><button class="inst-x" data-inst="x" aria-label="${t("instClose")}">✕</button></div>`);
+const installRow = () => (isInstalled() ? "" : `<div class="inst row">${instIcon}<div class="inst-t"><b>${t("instRowTitle")}</b><span>${t("instRowSub")}</span></div><button class="inst-go" data-inst="go">${t("instBtn")}</button></div>`);
+async function startInstall() {
+  if (deferredInstall) {
+    const p = deferredInstall; deferredInstall = null;
+    try { p.prompt(); const c = await p.userChoice; if (c.outcome === "accepted") { store.set("installed", "1"); render(true); } } catch {}
+    return;
+  }
+  openInstall();
+}
+function openInstall(os) {
+  closeInstall();
+  os = os || (isIos() ? "ios" : "android");
+  const k = os === "ios" ? "instI" : "instA";
+  const d = document.createElement("div");
+  d.id = "inst-sheet";
+  d.innerHTML = `<div class="inst-back" data-inst="close"></div><div class="inst-sheet" role="dialog" aria-modal="true"><div class="inst-grip"></div>
+    <div class="inst-head">${instIcon}<div><b>${t("instSheetTitle")}</b><span>${t("instPick")}</span></div></div>
+    <div class="seg" role="group"><button data-inst="os" data-os="android" class="${os === "android" ? "on" : ""}">${t("instAndroid")}</button><button data-inst="os" data-os="ios" class="${os === "ios" ? "on" : ""}">${t("instIphone")}</button></div>
+    <ol class="inst-steps">${[1, 2, 3, 4].map((n) => `<li><span class="n">${new Intl.NumberFormat(locale()).format(n)}</span><span>${t(k + n)}</span></li>`).join("")}</ol>
+    <button class="btn" data-inst="close">${t("instOk")}</button></div>`;
+  document.body.appendChild(d);
+}
+function closeInstall() { document.getElementById("inst-sheet")?.remove(); }
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-inst]");
+  if (!el) return;
+  const v = el.dataset.inst;
+  if (v === "go") startInstall();
+  else if (v === "x") { store.set("instDismissed", "1"); render(true); }
+  else if (v === "close") closeInstall();
+  else if (v === "os") openInstall(el.dataset.os);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeInstall(); });
 function welcomeHtml(vis) {
   const glyph = (c) => (c.logo || CFG.LOGOS?.[c.id]) ? `<img src="${esc(c.logo || CFG.LOGOS[c.id])}" alt="">` : `<span class="wg" style="background:${c.color}">${esc(c.glyph || t(c.id).slice(0, 2))}</span>`;
   const card = (c) => `<button class="wc" data-club="${c.id}" data-go="home" style="--c:${c.color};--ct:${c.tint || "#F1EBFC"}">${glyph(c)}<b>${t(c.id)}</b><small>${t("welcomeNote")}</small></button>`;
@@ -1384,6 +1433,7 @@ function welcomeHtml(vis) {
   const nm = S.user?.name ? " " + esc(String(S.user.name).split(" ")[0]) : "";
   return `<div class="wel"><div class="wel-top"><span class="wel-brandrow"><img class="wel-logo" src="icons/club_logo.svg" alt=""><span class="wel-brand">${t("app")}</span></span><span><button class="wbtn" data-act="refresh" aria-label="${t("refresh")}">↻</button></span></div>
     <div class="wel-hero"><h1>${t("welcomeHi")}${nm} 👋</h1><p>${t("tagline")}</p></div>
+    ${installBanner()}
     <p class="wel-pick">${t("welcomePick")}</p>
     <div class="wgrid">${vis.map(card).join("")}${LINK_CLUBS.map(ext).join("")}</div>
     ${isAdmin() || !CFG.API_URL ? "" : `<div class="wnav" role="navigation">${CFG.API_URL ? `<button data-go="support" aria-label="${t("support")}">${icon("support")}<span>${t("support")}</span>${S.user && answeredCount() > Number(store.get("supSeen", "0")) ? `<i class="wdot" aria-label="new"></i>` : ""}</button>` : ""}${CFG.API_URL ? `<button data-go="account" aria-label="${t("account")}">${icon("user")}<span>${t("account")}</span></button>` : ""}</div>`}</div>`;

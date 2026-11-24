@@ -392,3 +392,27 @@ nav button.on svg{transform:translateY(-2px) scale(1.12)}
 .del{margin:18px 0 6px;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
 .del summary{font-weight:600;color:#B42318;cursor:pointer}
 .btn.danger{background:#B42318;color:#fff}
+
+/* ---------- install as an app ---------- */
+.inst{position:relative;display:flex;gap:12px;align-items:center;margin:14px 0 4px;padding:14px;background:#fff;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.22);color:#1b1936}
+.inst img{width:52px;height:52px;border-radius:14px;flex-shrink:0}
+.inst-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.inst-t b{font-size:15px}.inst-t span{font-size:12.5px;color:#5b5878;line-height:1.35}
+.inst-go{border:0;background:var(--accent,#2B2268);color:#fff;border-radius:12px;height:40px;padding:0 16px;font:inherit;font-weight:600;font-size:14px;flex-shrink:0}
+.inst-x{position:absolute;top:2px;inset-inline-start:4px;border:0;background:transparent;color:#9a97b3;font-size:16px;width:34px;height:34px}
+.inst.row{background:var(--card,#fff);border:1px solid var(--line);box-shadow:none;margin:16px 0}
+.inst.row img{width:44px;height:44px;border-radius:12px}
+#inst-sheet{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center;animation:fadein .2s ease both}
+.inst-back{position:absolute;inset:0;background:rgba(10,8,30,.55)}
+.inst-sheet{position:relative;width:100%;max-width:520px;max-height:88%;overflow:auto;background:#fff;color:#1b1936;border-radius:26px 26px 0 0;padding:16px 20px calc(22px + env(safe-area-inset-bottom));animation:slideup .3s cubic-bezier(.2,.8,.2,1) both}
+.inst-grip{width:40px;height:4px;border-radius:9px;background:#d6d3e6;margin:0 auto 14px}
+.inst-head{display:flex;gap:12px;align-items:center;margin-bottom:12px}.inst-head img{width:48px;height:48px;border-radius:13px}
+.inst-head b{display:block;font-size:17px}.inst-head span{font-size:13px;color:#5b5878}
+.inst-steps{margin:16px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.inst-steps li{display:flex;gap:12px;align-items:center;font-size:14.5px;line-height:1.45}
+.inst-steps .n{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:#EEE9FB;color:#2B2268;display:grid;place-items:center;font-weight:700}
+:root[data-theme="dark"] .inst,:root[data-theme="dark"] .inst-sheet{background:var(--surface);color:var(--ink)}
+:root[data-theme="dark"] .inst-t span,:root[data-theme="dark"] .inst-head span{color:var(--muted)}
+:root[data-theme="dark"] .inst-steps .n{background:var(--soft);color:var(--accent-fg)}
+:root[data-theme="dark"] .inst-grip{background:var(--line)}
+.inst-sheet .btn{display:block;width:100%;margin-top:20px}
