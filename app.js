@@ -165,9 +165,11 @@ Object.assign(T.ar, { email: "الإيميل الشخصي", emailConfirm: "تأ�
   forgotLink: "نسيت كلمة السر؟", fpAdmin: "الكود مش بيوصل؟ اطلب من الأدمن كلمة سر مؤقتة.", fpTitle: "استرجاع كلمة السر", fpIntro: "اكتب اسم المستخدم وهنبعتلك كود من ٦ أرقام على الإيميل.", fpSend: "ابعتلي الكود", fpSent: "بعتنا كود من ٦ أرقام على", fpSpam: "مش لاقيه؟ شوف الـ Spam.", fpCode: "الكود (٦ أرقام)", fpNewPw: "كلمة السر الجديدة (٦ حروف أو أكتر)", fpReset: "غيّر كلمة السر", fpResend: "ابعت تاني", fpWait: "استنى شوية قبل ما تطلب تاني.", fpBack: "رجوع لتسجيل الدخول", fpDone: "اتغيّرت كلمة السر ✓ سجّل دخولك بالجديدة.",
   err_no_email: "مفيش إيميل استرجاع على الحساب ده. اطلب من الأدمن يعيد ضبط كلمة السر.", err_too_fast: "طلبات كتير. جرّب بعد شوية.", err_mail_quota: "الإيميلات واقفة النهارده. كلّم الأدمن.", err_mail_failed: "معرفناش نبعت الإيميل. راجع العنوان أو كلّم الأدمن.", err_bad_code: "الكود غلط.", err_code_expired: "الكود انتهى. اطلب كود جديد.",
   emAddTitle: "ضيف إيميل الاسترجاع", emAddSub: "عشان تقدر تسترجع كلمة السر لوحدك لو نسيتها.", emHave: "إيميل الاسترجاع", emChange: "تغيير", emSave: "احفظ الإيميل", emSaved: "اتحفظ الإيميل ✓", emPw: "كلمة السر الحالية" });
+Object.assign(T.en, { fpVerifyTitle: "Enter the code", fpVerify: "Check the code", fpOkCode: "Code is correct ✓", fpNewTitle: "Choose a new password" });
+Object.assign(T.ar, { fpVerifyTitle: "اكتب الكود", fpVerify: "تأكد من الكود", fpOkCode: "الكود صح ✓", fpNewTitle: "اختار كلمة سر جديدة" });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 31";
+const VERSION = "final version 32";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -484,12 +486,15 @@ function forgotScreen() {
   if (F.step === 1) return `<p class="note" style="text-align:start">${back}</p><h2>${t("fpTitle")}</h2><form id="fp1-form" class="form"><p class="note" style="text-align:start;padding:0">${t("fpIntro")}</p>
     <label for="fp-user">${t("username")}</label><input id="fp-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" required value="${esc(F.username)}">
     ${err}<button class="btn" type="submit"${F.busy ? " disabled" : ""}>${F.busy ? t("pleaseWait") : t("fpSend")}</button></form><p class="note">${t("fpAdmin")}</p>`;
-  return `<p class="note" style="text-align:start">${back}</p><h2>${t("fpTitle")}</h2><form id="fp2-form" class="form">
+  if (F.step === 2) return `<p class="note" style="text-align:start">${back}</p><h2>${t("fpVerifyTitle")}</h2><form id="fp2-form" class="form">
     <div class="warn" role="status" style="background:#E8F6EC;border-color:#9AD3AB;color:#14532D">✓ ${t("fpSent")} <b dir="ltr">${esc(F.masked)}</b><br><small>${t("fpSpam")}</small></div>
-    <label for="fp-code">${t("fpCode")}</label><input id="fp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" dir="ltr" required style="letter-spacing:.3em;font-size:22px;font-weight:700;text-align:center">
-    <label for="fp-new">${t("fpNewPw")}</label><input id="fp-new" name="newPassword" type="password" autocomplete="new-password" minlength="6" maxlength="64" required>
-    ${err}<button class="btn" type="submit"${F.busy ? " disabled" : ""}>${F.busy ? t("pleaseWait") : t("fpReset")}</button></form>
+    <label for="fp-code">${t("fpCode")}</label><input id="fp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" dir="ltr" required autofocus style="letter-spacing:.3em;font-size:22px;font-weight:700;text-align:center">
+    ${err}<button class="btn" type="submit"${F.busy ? " disabled" : ""}>${F.busy ? t("pleaseWait") : t("fpVerify")}</button></form>
     <p class="note"><button class="linkbtn" data-fp="resend">${t("fpResend")}</button></p><p class="note">${t("fpAdmin")}</p>`;
+  return `<p class="note" style="text-align:start">${back}</p><h2>${t("fpNewTitle")}</h2><form id="fp3-form" class="form">
+    <div class="warn" role="status" style="background:#E8F6EC;border-color:#9AD3AB;color:#14532D">${t("fpOkCode")}</div>
+    <label for="fp-new">${t("fpNewPw")}</label><input id="fp-new" name="newPassword" type="password" autocomplete="new-password" minlength="6" maxlength="64" required autofocus>
+    ${err}<button class="btn" type="submit"${F.busy ? " disabled" : ""}>${F.busy ? t("pleaseWait") : t("fpReset")}</button></form>`;
 }
 async function fpRequest(username) {
   const F = S.fp;
@@ -501,13 +506,24 @@ async function fpRequest(username) {
   } catch { F.err = t("err_generic"); }
   F.busy = false; render();
 }
+async function fpVerify(form) {
+  const F = S.fp, v = Object.fromEntries(new FormData(form));
+  F.busy = true; F.err = ""; render();
+  try {
+    const r = await api("forgotVerify", { username: F.username, code: v.code });
+    if (r.ok) { F.step = 3; F.ticket = r.ticket; }
+    else { F.err = T[S.lang]["err_" + r.error] || t("err_generic"); if (r.error === "code_expired") F.step = 2; }
+  } catch { F.err = t("err_generic"); }
+  F.busy = false; render();
+}
 async function fpReset(form) {
   const F = S.fp, v = Object.fromEntries(new FormData(form));
   F.busy = true; F.err = ""; render();
   try {
-    const r = await api("forgotReset", { username: F.username, code: v.code, newPassword: v.newPassword });
+    const r = await api("forgotReset", { ticket: F.ticket, newPassword: v.newPassword });
     if (r.ok) { S.form = { ...S.form, username: F.username }; S.acct = { mode: "login", err: "", ok: t("fpDone") }; S.fp = { step: 1, username: "", masked: "", err: "", busy: false, nextAt: 0 }; render(); return; }
     F.err = T[S.lang]["err_" + r.error] || t("err_generic");
+    if (r.error === "code_expired") F.step = 1;
   } catch { F.err = t("err_generic"); }
   F.busy = false; render();
 }
@@ -1657,7 +1673,8 @@ document.addEventListener("input", (e) => { if (e.target.id === "q") { S.q = e.t
 document.addEventListener("submit", (e) => {
   if (e.target.id === "acct-form") { e.preventDefault(); submitAccount(e.target); }
   if (e.target.id === "fp1-form") { e.preventDefault(); fpRequest(String(new FormData(e.target).get("username") || "").trim().toLowerCase()); }
-  if (e.target.id === "fp2-form") { e.preventDefault(); fpReset(e.target); }
+  if (e.target.id === "fp2-form") { e.preventDefault(); fpVerify(e.target); }
+  if (e.target.id === "fp3-form") { e.preventDefault(); fpReset(e.target); }
   if (e.target.id === "em-form") { e.preventDefault(); saveEmail(e.target); }
   if (e.target.id === "del-form") { e.preventDefault(); deleteAccount(e.target); }
   if (e.target.id === "sup-form") { e.preventDefault(); submitSupport(e.target); }
