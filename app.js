@@ -149,9 +149,11 @@ Object.assign(T.ar, {
 Object.assign(T.en, { viewerHint: "If the page stays blank, that website does not allow opening inside other apps. Tap \u201cOpen in browser\u201d." });
 Object.assign(T.en, { regGrade: "Your grade", tAdmins: "Admins", tNoGrade: "No grade", setGrade: "Grade", err_invalid_grade: "Please choose your grade." });
 Object.assign(T.ar, { regGrade: "إنت في أنهي صف؟", tAdmins: "الأدمن", tNoGrade: "من غير صف", setGrade: "الصف", err_invalid_grade: "اختار الصف بتاعك." });
+Object.assign(T.en, { privacy: "Privacy policy", delTitle: "Delete my account", delNote: "This permanently deletes your account, quiz results and messages. It can't be undone.", delBtn: "Delete my account", delConfirm: "Delete your account and all your data for good?", delPw: "Your password" });
+Object.assign(T.ar, { privacy: "سياسة الخصوصية", delTitle: "حذف حسابي", delNote: "ده بيمسح حسابك ونتايج الكويزات والرسايل نهائيًا، ومينفعش يتراجع.", delBtn: "احذف حسابي", delConfirm: "تحذف حسابك وكل بياناتك نهائيًا؟", delPw: "كلمة السر" });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 28";
+const VERSION = "final version 29";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -457,6 +459,23 @@ function supportScreen() {
     <button class="btn" type="submit"${S.sending ? " disabled" : ""}>${S.sending ? t("sending") : t("send")}</button></form>
   <h2>${t("myQuestions")}</h2>${list}`;
 }
+const privacyLink = () => `<p class="note"><button class="linkbtn" data-view="${esc(new URL("privacy.html", location.href).href)}" data-title="${esc(t("privacy"))}">${t("privacy")}</button></p>`;
+function delForm() {
+  return `<details class="del"><summary>${t("delTitle")}</summary><form id="del-form" class="form"><p class="note" style="text-align:start;padding:0">${t("delNote")}</p>
+    <label for="del-pw">${t("delPw")}</label><input id="del-pw" name="pw" type="password" autocomplete="current-password" required>
+    ${S.delErr ? `<div class="warn" role="alert">${esc(S.delErr)}</div>` : ""}
+    <button class="btn danger" type="submit">${t("delBtn")}</button></form></details>`;
+}
+async function deleteAccount(form) {
+  const pw = new FormData(form).get("pw");
+  if (!confirm(t("delConfirm"))) return;
+  try {
+    const r = await api("deleteMyAccount", { token: S.user.token, password: pw });
+    if (r.ok) { S.delErr = ""; signOut(); render(); return; }
+    S.delErr = T[S.lang]["err_" + r.error] || t("err_generic");
+  } catch { S.delErr = t("err_generic"); }
+  render();
+}
 function pwForm(forced) {
   const P = S.pw;
   return `<h2>${t("changePw")}</h2><form id="pw-form" class="form">
@@ -493,7 +512,7 @@ function themePicker() {
 }
 function accountScreen() {
   if (S.user && gate() === "password") return `<div class="warn" role="alert">${t("mustChangeNote")}</div>${pwForm(true)}<button class="btn ghost" data-act="signout">${t("signOut")}</button>`;
-  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${langPicker()}${themePicker()}${pwForm(false)}<p class="note">${t("accountNote")}</p><button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  if (S.user) return `<div class="hero"><small>${t("hello")}</small><b dir="auto">${esc(S.user.name)}</b><span dir="ltr">@${esc(S.user.username)}</span>${isAdmin() ? `<span style="display:block;margin-top:8px"><span class="badge">${t("adminBadge")} · ${esc(roleLabel(S.user.role))}</span></span>` : ""}</div>${langPicker()}${themePicker()}${pwForm(false)}${isSuper() ? "" : delForm()}<p class="note">${t("accountNote")}</p>${privacyLink()}<button class="btn ghost" data-act="signout">${t("signOut")}</button><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
   const reg = S.acct.mode === "register";
   return `${gate() === "login" ? `<p class="note">${t("gateLogin")}</p>` : ""}<div class="seg" role="group"><button data-acct-mode="login" class="${reg ? "" : "on"}">${t("signIn")}</button><button data-acct-mode="register" class="${reg ? "on" : ""}">${t("createAccount")}</button></div>
   <form id="acct-form" class="form">
@@ -503,7 +522,7 @@ function accountScreen() {
     <label for="f-pass">${t("password")}</label><input id="f-pass" name="password" type="password" autocomplete="${reg ? "new-password" : "current-password"}" minlength="6" required>
     ${S.acct.err ? `<div class="warn" role="alert">${esc(S.acct.err)}</div>` : ""}
     <button class="btn" type="submit">${reg ? t("createAccount") : t("signIn")}</button>
-  </form>${reg ? "" : `<p class="note">${t("forgotHint")}</p>`}<p class="note">${t("accountNote")}</p><p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
+  </form>${reg ? "" : `<p class="note">${t("forgotHint")}</p>`}<p class="note">${t("accountNote")}</p>${privacyLink()}<p class="note" dir="ltr" style="opacity:.6">${/^\d/.test(VERSION) ? "v" : ""}${VERSION}</p>`;
 }
 
 // Opens Google Drive / Docs / YouTube links inside the app instead of leaving it
@@ -1505,6 +1524,7 @@ document.addEventListener("click", (e) => {
 document.addEventListener("input", (e) => { if (e.target.id === "q") { S.q = e.target.value; render(true); } });
 document.addEventListener("submit", (e) => {
   if (e.target.id === "acct-form") { e.preventDefault(); submitAccount(e.target); }
+  if (e.target.id === "del-form") { e.preventDefault(); deleteAccount(e.target); }
   if (e.target.id === "sup-form") { e.preventDefault(); submitSupport(e.target); }
 });
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { loadAll(); if (S.tab === "quizzes") loadResults(); if (S.user) { loadSupport(); loadAdminInbox(); } } });

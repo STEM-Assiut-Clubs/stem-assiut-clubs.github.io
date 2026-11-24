@@ -388,3 +388,7 @@ nav button.on svg{transform:translateY(-2px) scale(1.12)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;transition-duration:.001ms!important}
 }
+.linkbtn{background:none;border:0;padding:0;color:var(--accent-fg,var(--accent));text-decoration:underline;font:inherit;cursor:pointer}
+.del{margin:18px 0 6px;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.del summary{font-weight:600;color:#B42318;cursor:pointer}
+.btn.danger{background:#B42318;color:#fff}
