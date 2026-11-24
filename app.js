@@ -151,7 +151,7 @@ Object.assign(T.en, { regGrade: "Your grade", tAdmins: "Admins", tNoGrade: "No g
 Object.assign(T.ar, { regGrade: "إنت في أنهي صف؟", tAdmins: "الأدمن", tNoGrade: "من غير صف", setGrade: "الصف", err_invalid_grade: "اختار الصف بتاعك." });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 27";
+const VERSION = "final version 28";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -315,12 +315,11 @@ async function loadApiContent() {
 }
 const mapQuiz = (x, i) => ({ id: "", qid: x.id, native: true, clubs: parseClubs(x.club), type: "quiz", title: x.title, desc: "", lo: x.lo || "", url: "", date: parseDate(x.date), ds: x.date || "", grades: parseGrades(x.grade), attempts: +x.attempts || 0, minutes: +x.minutes || 0, count: x.count || 0, i: 40000 + i });
 const mapEv = (x) => ({ id: x.id || "", clubs: parseClubs(x.club), title: x.title, date: parseDate(x.date), ds: x.date || "", time: x.time, place: x.place, note: x.note, grades: parseGrades(x.grade) });
-async function loadAll() {
-  // Content comes from the app's own sheets (via the API). The old published CSV sheets still load too
-  // unless LEGACY_CSV is false in config.js. Items that exist in both places show once.
-  const legacy = CFG.LEGACY_CSV !== false;
-  const csv = (u, k) => (legacy && u ? loadCsv(u, k) : Promise.resolve({ text: "", live: true }));
-  const [r, e, rf, rv, ap] = await Promise.all([csv(CFG.RESOURCES_CSV, "csv_res"), csv(CFG.EVENTS_CSV, "csv_evt"), csv(CFG.REFERENCES_CSV, "csv_ref"), csv(CFG.REVISION_CSV, "csv_rev"), loadApiContent()]);
+// Content paints at once from what was saved last time, then each source updates the screen as soon as it arrives
+// (no more waiting for the slowest sheet or a cold backend before anything shows).
+let SRC = null;
+function buildContent() {
+  const { r, e, rf, rv, ap } = SRC;
   S.live = r.live && e.live && rf.live && rv.live && ap.live;
   const A = ap.data || {};
   const resKey = (x) => (x.title || "").trim().toLowerCase() + "|" + (x.url || "").trim();
@@ -337,7 +336,20 @@ async function loadAll() {
   S.quizzes = (A.quizzes || []).map(mapQuiz).filter((x) => x.clubs.length);
   S.resources = S.resources.concat(S.quizzes);
   S.resources = S.resources.filter(seesItem); S.events = S.events.filter(seesItem);
-  render(true);
+}
+async function loadAll() {
+  // Content comes from the app's own sheets (via the API). The old published CSV sheets still load too
+  // unless LEGACY_CSV is false in config.js. Items that exist in both places show once.
+  const legacy = CFG.LEGACY_CSV !== false;
+  const saved = (k) => ({ text: legacy ? store.get(k, "") : "", live: true });
+  let savedApi = { live: true, data: null };
+  try { savedApi = { live: true, data: JSON.parse(store.get(cacheKey(), "")) }; } catch {}
+  SRC = { r: saved("csv_res"), e: saved("csv_evt"), rf: saved("csv_ref"), rv: saved("csv_rev"), ap: savedApi };
+  const mine = SRC;
+  buildContent(); render(true);
+  const csv = (u, k) => (legacy && u ? loadCsv(u, k) : Promise.resolve({ text: "", live: true }));
+  const feed = (name, p) => p.then((v) => { if (SRC !== mine) return; mine[name] = v; buildContent(); render(true); });
+  await Promise.all([feed("r", csv(CFG.RESOURCES_CSV, "csv_res")), feed("e", csv(CFG.EVENTS_CSV, "csv_evt")), feed("rf", csv(CFG.REFERENCES_CSV, "csv_ref")), feed("rv", csv(CFG.REVISION_CSV, "csv_rev")), feed("ap", loadApiContent())]);
 }
 
 // ---- helpers ----

@@ -351,16 +351,15 @@ input[type=file]{font:inherit;padding:10px 0}
 :root[data-theme="dark"] nav button.on svg{color:var(--accent-fg)}
 
 /* ---------- motion ---------- */
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 @keyframes slideup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 @keyframes shim{to{background-position:-200% 0}}
 @keyframes popin{from{opacity:0;transform:translate(-50%,-12px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
 /* a new screen rises in, its first items one after another */
-.enter>*{animation:rise .38s cubic-bezier(.2,.7,.2,1) both}
-.enter>*:nth-child(2){animation-delay:.04s}.enter>*:nth-child(3){animation-delay:.08s}.enter>*:nth-child(4){animation-delay:.12s}
-.enter>*:nth-child(5){animation-delay:.16s}.enter>*:nth-child(6){animation-delay:.2s}.enter>*:nth-child(7){animation-delay:.24s}
-.enter>*:nth-child(n+8){animation-delay:.28s}
+.enter>*{animation:rise .24s cubic-bezier(.2,.7,.2,1) both}
+.enter>*:nth-child(2){animation-delay:.02s}.enter>*:nth-child(3){animation-delay:.04s}.enter>*:nth-child(4){animation-delay:.06s}
+.enter>*:nth-child(n+5){animation-delay:.08s}
 /* press feedback and soft state changes */
 .btn,.mini,.card,.tile,.wc,.sc,.seg button,nav button,.opt,.hh button,.nextc,.jb{transition:transform .16s cubic-bezier(.2,.7,.2,1),background-color .22s,color .22s,border-color .22s,box-shadow .22s,opacity .2s}
 .btn:active,.mini:active,button.card:active,.tile:active,.wc:active,.sc:active,.seg button:active,.opt:active,.nextc:active,.jb:active{transform:scale(.96)}
