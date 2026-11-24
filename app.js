@@ -151,7 +151,7 @@ Object.assign(T.en, { regGrade: "Your grade", tAdmins: "Admins", tNoGrade: "No g
 Object.assign(T.ar, { regGrade: "إنت في أنهي صف؟", tAdmins: "الأدمن", tNoGrade: "من غير صف", setGrade: "الصف", err_invalid_grade: "اختار الصف بتاعك." });
 Object.assign(T.ar, { viewerHint: "لو الصفحة فضلت فاضية، الموقع ده مش بيسمح يتفتح جوه تطبيقات تانية. اضغط «فتح في المتصفح»." });
 
-const VERSION = "final version 26";
+const VERSION = "final version 27";
 const ALL_CLUBS = CFG.CLUBS || [{ id: "chemistry", color: "#6D3FC7", tint: "#F1EBFC" }, { id: "physics", color: "#1F5FD1", tint: "#E8F0FD" }];
 const CLUB_LIST = ALL_CLUBS.filter((c) => !c.external); // clubs that have their own pages inside the app
 const LINK_CLUBS = ALL_CLUBS.filter((c) => c.external && /^https:\/\/[^\s]+$/i.test(c.url || "")); // clubs that open their own website (hidden until a valid https link is set)
@@ -391,7 +391,7 @@ function resultsBlock() {
   if (!CFG.API_URL) return "";
   if (!S.user) return `<button class="card" data-go="account"><div class="ico">${icon("user")}</div><div class="grow"><b>${t("signInToSee")}</b></div></button>`;
   const R = { ...S.results, list: S.results.list.filter((x) => !x.club || inClub({ clubs: parseClubs(x.club) }, S.club)) };
-  const body = R.state === "loading" || R.state === "idle" ? `<p class="note">${t("loadingRes")}</p>`
+  const body = R.state === "loading" || R.state === "idle" ? `${skel()}`
     : R.state === "error" ? `<div class="warn">${t("resultsErr")}</div>`
     : !R.list.length ? `<p class="note">${t("noResults")}</p>` : R.list.map(resultTile).join("");
   return `<h2>${t("myResults")}</h2>${body}<h2>${t("quizzes")}</h2>`;
@@ -436,7 +436,7 @@ function supportScreen() {
   if (!CFG.API_URL) return "";
   if (!S.user) return `<button class="card" data-go="account"><div class="ico">${icon("user")}</div><div class="grow"><b>${t("signInToAsk")}</b></div></button>`;
   const R = S.support;
-  const list = R.state === "loading" && !R.list.length ? `<p class="note">${t("loadingRes")}</p>`
+  const list = R.state === "loading" && !R.list.length ? `${skel()}`
     : R.state === "error" ? `<div class="warn">${t("supportErr")}</div>`
     : !R.list.length ? `<p class="note">${t("noQuestions")}</p>` : R.list.map(supportTile).join("");
   return `<form id="sup-form" class="form"><label for="f-msg">${t("askTitle")}</label>
@@ -1045,7 +1045,7 @@ function admContent() {
 function qresScreen() {
   const R = S.adm.qres;
   const rows = R.list.map((x) => { const d = new Date(x.when); return `<div class="card"><div class="grow"><b dir="auto">${esc(x.name)}</b><span dir="ltr">@${esc(x.username)}${!isNaN(d) ? " · " + esc(shortDate(d)) : ""}</span></div>${x.cancelled ? `<span class="badge no">${t("qzCancelled")}</span>` : ""}<span class="badge" dir="ltr">${esc(x.score)}</span></div>`; }).join("");
-  return `<button class="btn ghost" data-adm="qres-close" style="margin:0">${t("back")}</button><h2 dir="auto">${esc(R.title)}</h2>${R.state === "loading" ? `<p class="note">${t("loadingRes")}</p>` : R.state === "error" ? `<div class="warn">${t("supportErr")}</div>` : rows || `<p class="note">${t("noAttempts")}</p>`}`;
+  return `<button class="btn ghost" data-adm="qres-close" style="margin:0">${t("back")}</button><h2 dir="auto">${esc(R.title)}</h2>${R.state === "loading" ? `${skel()}` : R.state === "error" ? `<div class="warn">${t("supportErr")}</div>` : rows || `<p class="note">${t("noAttempts")}</p>`}`;
 }
 function admMsgTile(m) {
   const d = new Date(m.when);
@@ -1059,14 +1059,14 @@ function admMsgTile(m) {
 }
 function admInbox() {
   const I = S.adm.inbox;
-  if ((I.state === "loading" || I.state === "idle") && !I.list.length) return `<p class="note">${t("loadingRes")}</p>`;
+  if ((I.state === "loading" || I.state === "idle") && !I.list.length) return `${skel()}`;
   if (I.state === "error") return `<div class="warn">${t("supportErr")}</div>`;
   const list = [...I.list].sort((a, b) => (!!a.reply - !!b.reply) || (a.when < b.when ? 1 : -1));
   return list.map(admMsgTile).join("") || `<p class="note">${t("noMsgs")}</p>`;
 }
 function admTeam() {
   const A = S.adm, U = A.users;
-  if ((U.state === "loading" || U.state === "idle") && !U.list.length) return `<p class="note">${t("loadingRes")}</p>`;
+  if ((U.state === "loading" || U.state === "idle") && !U.list.length) return `${skel()}`;
   if (U.state === "error") return `<div class="warn">${t("supportErr")}</div>`;
   const q = S.q.trim().toLowerCase();
   const isAdm = (u) => !!parseRoleStr(u.role).super || parseRoleStr(u.role).clubs.length > 0;
@@ -1160,7 +1160,7 @@ function quizScreen() {
   const Q = S.qz;
   const back = `<button class="btn ghost" data-go="quizzes" style="margin-top:0">${t("qzBack")}</button>`;
   if (!Q) return back;
-  if (Q.state === "loading") return `<p class="note">${t("loadingRes")}</p>`;
+  if (Q.state === "loading") return `${skel()}`;
   if (Q.state === "error") return `<div class="warn" role="alert">${esc(Q.err)}</div>${back}`;
   if (Q.state === "result") return quizResult();
   if (Q.state === "cancelled") return quizCancelled();
@@ -1369,7 +1369,27 @@ function navHtml() {
 }
 
 // ---- shell ----
+// ---- motion: a screen animates in only when the person navigates, never on a background refresh ----
+let lastScreen = "", lastTheme = "";
+const skel = (n = 3) => `<div class="skels" aria-busy="true" aria-label="${esc(t("loadingRes"))}">${Array.from({ length: n }, () => '<div class="skel"></div>').join("")}</div>`;
 function render(keep) {
+  const A = S.adm || {};
+  const key = [S.tab, S.club, S.grade, A.sec, A.tsec, A.form ? "f" : "", A.qres ? "q" : "", S.qz ? "z" : "", S.user ? "u" : "n"].join("|");
+  const root = document.documentElement;
+  const themeChanged = lastTheme && lastTheme !== S.theme;
+  lastTheme = S.theme;
+  if (themeChanged) { root.classList.add("tt"); setTimeout(() => root.classList.remove("tt"), 500); }
+  renderCore(keep);
+  if (key !== lastScreen) {
+    const first = !lastScreen;
+    lastScreen = key;
+    if (!first && !keep) {
+      const m = document.querySelector("#app > main, #app > .wel");
+      if (m) { m.classList.remove("enter"); void m.offsetWidth; m.classList.add("enter"); }
+    }
+  }
+}
+function renderCore(keep) {
   // a background refresh must never drop the keyboard or wipe what someone is typing
   if (keep && document.activeElement?.closest?.("[data-pw],[data-ar],[data-af],[data-aq],#f-user,#f-name,#f-pass,#f-msg")) return;
   const vis = visClubs();
